@@ -106,7 +106,7 @@ export function MarketingLandingPage() {
             </GradientButton>
             <p className="text-sm text-gray-500 flex items-center gap-2">
               <Shield className="w-4 h-4" />
-              Private & Secure • No credit card required
+              Private & Secure • Proprietary Simulation Technology
             </p>
           </div>
 

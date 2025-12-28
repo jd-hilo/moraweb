@@ -62,3 +62,4 @@ ClarifierScreen → PaymentPage → Stripe Checkout → Success → SimulateLife
 - ✅ Prevents duplicate payments (checks is_premium)
 - ✅ Mobile-responsive design
 
+

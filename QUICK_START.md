@@ -84,3 +84,4 @@ Your app is now live. Vercel will auto-deploy on every git push.
 - Check build logs in Vercel Dashboard
 - Ensure all dependencies are in `package.json`
 
+

@@ -81,3 +81,4 @@ export const Events = {
 
 export default mixpanel;
 
+

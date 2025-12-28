@@ -38,7 +38,7 @@ export function PoliticsScreen() {
       {showStat && (
         <StatMessage
           icon="🔬"
-          text="Powered by proprietary AI technology"
+          text="Powered by Proprietary Simulation Technology"
         />
       )}
       <OnboardingScreen

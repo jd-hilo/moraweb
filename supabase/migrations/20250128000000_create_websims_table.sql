@@ -56,3 +56,4 @@ CREATE INDEX IF NOT EXISTS idx_websims_user_id ON websims(user_id);
 -- Create index on created_at for sorting
 CREATE INDEX IF NOT EXISTS idx_websims_created_at ON websims(created_at DESC);
 
+
