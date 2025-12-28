@@ -62,8 +62,9 @@ export function DashboardPage() {
 
   const handleShare = async (simulationId: string) => {
     const shareUrl = `${window.location.origin}/simulation-results?simulationId=${simulationId}`;
+    const shareMessage = `Check out my life simulation - presented by mora.\n\n${shareUrl}`;
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(shareMessage);
       trackEvent(Events.SIMULATION_SHARED, {
         simulation_id: simulationId,
         user_id: user?.id,

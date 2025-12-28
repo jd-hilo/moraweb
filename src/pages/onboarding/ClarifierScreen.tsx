@@ -1,42 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { TypewriterText } from '../../components/TypewriterText';
 import { GradientButton } from '../../components/GradientButton';
 import { useOnboarding } from '../../context/OnboardingContext';
 import { supabase } from '../../lib/supabase';
-import { generateLifeSimulation } from '../../lib/simulation';
 import { trackEvent, Events } from '../../lib/mixpanel';
-
-const loadingMessages = [
-  'Analyzing your past...',
-  'Building desires...',
-  'Instilling hometown values...',
-  'Structuring decision patterns...',
-  'Finalizing your digital twin...',
-];
 
 export function ClarifierScreen() {
   const navigate = useNavigate();
-  const { data, resetData } = useOnboarding();
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const [isComplete, setIsComplete] = useState(false);
+  const { data } = useOnboarding();
+  const [showButton, setShowButton] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentMessageIndex((prev) => {
-        if (prev >= loadingMessages.length - 1) {
-          clearInterval(interval);
-          setTimeout(() => setIsComplete(true), 500);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const handleCreateTwin = async () => {
     setIsSaving(true);
@@ -102,20 +77,36 @@ export function ClarifierScreen() {
       hideButton
     >
       <div className="text-center space-y-8">
-        <div className="animate-slide-up">
-          <GradientButton
-            onClick={async () => {
-              // Save profile data first, then navigate to payment
-              await handleCreateTwin();
-              if (!isSaving) {
-                navigate('/payment');
-              }
+        <div className="mb-8">
+          <TypewriterText
+            texts={["Your digital twin has been initialized"]}
+            speed={60}
+            onComplete={() => {
+              // Fade in button after text completes
+              setTimeout(() => {
+                setShowButton(true);
+              }, 300);
             }}
-            disabled={isSaving}
-          >
-            {isSaving ? 'Saving...' : 'Simulate My Life'}
-          </GradientButton>
+            className="text-3xl md:text-4xl font-serif font-bold text-black"
+          />
         </div>
+        {showButton && (
+          <div className="animate-fade-in">
+            <GradientButton
+              onClick={async () => {
+                // Save profile data first, then navigate to payment
+                await handleCreateTwin();
+                if (!isSaving) {
+                  navigate('/payment');
+                }
+              }}
+              disabled={isSaving}
+              variant="purple"
+            >
+              {isSaving ? 'Saving...' : 'Simulate My Life'}
+            </GradientButton>
+          </div>
+        )}
       </div>
     </OnboardingScreen>
   );

@@ -22,7 +22,7 @@ export function SimulateLifePage() {
   const { data: onboardingData } = useOnboarding();
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const [showButton, setShowButton] = useState(true);
+  const [showButton, setShowButton] = useState(false);
   const autoRunRef = useRef<string | null>(null);
 
   // Reset state when component mounts or location changes
@@ -31,7 +31,7 @@ export function SimulateLifePage() {
     console.log('📍 Location state:', location.state);
     setIsGenerating(false);
     setCurrentMessageIndex(0);
-    setShowButton(true);
+    setShowButton(false);
     autoRunRef.current = null;
   }, [location.pathname]);
 
@@ -73,6 +73,7 @@ export function SimulateLifePage() {
   }, [isGenerating]);
 
   const handleGenerateSimulation = async () => {
+    console.log('🚀 Simulate My Life button clicked - starting AI generation...');
     setIsGenerating(true);
     setCurrentMessageIndex(0);
 
@@ -149,16 +150,19 @@ export function SimulateLifePage() {
           <>
             <div className="mb-8">
               <TypewriterText
-                texts={["Ready to simulate your life?"]}
+                texts={["Your digital twin has been initialized"]}
                 speed={60}
+                onComplete={() => {
+                  // Fade in button after text completes
+                  setTimeout(() => {
+                    setShowButton(true);
+                  }, 300);
+                }}
                 className="text-3xl md:text-4xl font-serif font-bold text-black"
               />
             </div>
-            <p className="text-xl text-gray-600 mb-8">
-              Based on your digital twin, we'll generate a personalized 10-year life simulation
-            </p>
             {showButton && (
-              <div className="animate-slide-up">
+              <div className="animate-fade-in">
                 <GradientButton
                   onClick={handleGenerateSimulation}
                   disabled={isGenerating}
