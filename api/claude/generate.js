@@ -6,12 +6,21 @@ export default async function handler(req, res) {
   }
 
   // Vercel serverless functions need env vars WITHOUT VITE_ prefix
-  const apiKey = process.env.CLAUDE_API_KEY || process.env.VITE_CLAUDE_API_KEY;
+  let apiKey = process.env.CLAUDE_API_KEY || process.env.VITE_CLAUDE_API_KEY;
 
   if (!apiKey) {
     console.error('Claude API key not configured');
     console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('CLAUDE')));
     return res.status(500).json({ error: 'Claude API key not configured' });
+  }
+
+  // Clean the API key - remove any newlines, extra whitespace, or trailing content
+  apiKey = apiKey.trim().split('\n')[0].split('\r')[0].trim();
+  
+  // Validate it looks like a valid API key (starts with sk-ant-)
+  if (!apiKey.startsWith('sk-ant-')) {
+    console.error('Invalid API key format:', apiKey.substring(0, 20) + '...');
+    return res.status(500).json({ error: 'Invalid Claude API key format' });
   }
 
   try {

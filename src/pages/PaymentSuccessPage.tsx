@@ -58,7 +58,7 @@ export function PaymentSuccessPage() {
                 .from('payments')
                 .insert({
                   user_id: user.id,
-                  amount: 1.00,
+                  amount: 4.99,
                   status: 'completed',
                   stripe_payment_id: paymentIntentId,
                   simulation_id: null, // No simulation ID at payment time

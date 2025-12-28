@@ -204,8 +204,8 @@ export function DashboardPage() {
           </div>
         )}
 
-        {/* Footer with Terms of Service */}
-        <div className="pt-12 pb-6">
+        {/* Footer with Terms of Service and Contact */}
+        <div className="pt-12 pb-6 flex items-center gap-4">
           <a
             href="https://pastoral-supply-662.notion.site/Terms-of-Service-Mora-2d72cec59ddf80099945c84fe81add84?source=copy_link"
             target="_blank"
@@ -213,6 +213,13 @@ export function DashboardPage() {
             className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
           >
             Terms of Service
+          </a>
+          <span className="text-gray-300">•</span>
+          <a
+            href="mailto:hello@hilo.media"
+            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            Contact Us
           </a>
         </div>
       </div>

@@ -45,7 +45,7 @@ export default async function handler(req, res) {
               name: 'Life Simulation',
               description: 'Get instant access to your personalized 10-year life simulation',
             },
-            unit_amount: 100, // $1.00 in cents
+            unit_amount: 499, // $4.99 in cents
           },
           quantity: 1,
         },
