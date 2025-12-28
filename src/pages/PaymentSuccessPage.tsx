@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { GradientButton } from '../components/GradientButton';
-import { CheckCircle, Sparkles } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { trackEvent } from '../lib/mixpanel';
 
 // Use relative path in production (Vercel serverless), localhost in dev
@@ -81,6 +80,17 @@ export function PaymentSuccessPage() {
           });
 
           setIsVerified(true);
+          
+          // Automatically start simulation generation after a brief delay
+          setTimeout(() => {
+            navigate('/simulate-life', {
+              state: {
+                autoRun: true,
+                timestamp: Date.now(),
+                paymentSuccess: true,
+              },
+            });
+          }, 2000); // 2 second delay to show success message
         } else {
           // Payment not verified
           navigate('/payment');
@@ -133,20 +143,10 @@ export function PaymentSuccessPage() {
           <p className="text-lg text-gray-600 mb-2">
             Your payment has been processed successfully.
           </p>
-          <p className="text-gray-500">
-            You now have access to your life simulation.
+          <p className="text-gray-500 animate-pulse">
+            Starting your simulation...
           </p>
         </div>
-
-        <GradientButton
-          onClick={() => navigate('/simulate-life', { state: { paymentSuccess: true } })}
-          variant="purple"
-          size="lg"
-          className="w-full flex items-center justify-center gap-2"
-        >
-          <Sparkles className="w-5 h-5" />
-          Start Your Simulation
-        </GradientButton>
       </div>
     </div>
   );
