@@ -57,20 +57,24 @@ export function PaymentPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        const errorText = await response.text();
+        console.error('Checkout API error:', response.status, errorText);
+        throw new Error(`Failed to create checkout session: ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Checkout session created:', data);
 
       // Redirect to Stripe Checkout
       if (data.url) {
         window.location.href = data.url;
       } else {
+        console.error('No URL in response:', data);
         throw new Error('No checkout URL received');
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
-      alert('Failed to start checkout. Please try again.');
+      alert(`Failed to start checkout: ${error.message || 'Please check console for details'}`);
       setIsLoading(false);
     }
   };

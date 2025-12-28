@@ -75,6 +75,10 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
       return res.status(500).json({ error: 'Stripe secret key not configured' });
     }
 
+    const origin = req.headers.origin || 'http://localhost:5173';
+    console.log('Creating Stripe checkout session for origin:', origin);
+    console.log('Stripe secret key present:', !!process.env.STRIPE_SECRET_KEY);
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -91,21 +95,23 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.origin || 'http://localhost:5173'}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin || 'http://localhost:5173'}/payment`,
+      success_url: `${origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/payment`,
       metadata: {
         userId: userId || 'anonymous',
         product: 'life-simulation',
       },
     });
 
+    console.log('Stripe session created:', session.id);
     res.json({
       sessionId: session.id,
       url: session.url,
     });
   } catch (error) {
     console.error('Stripe error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    res.status(500).json({ error: error.message || 'Unknown error creating checkout session' });
   }
 });
 
