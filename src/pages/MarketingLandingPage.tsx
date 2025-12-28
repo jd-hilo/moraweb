@@ -78,7 +78,7 @@ export function MarketingLandingPage() {
               <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=64&h=64" alt="User" className="w-6 h-6 rounded-full border-2 border-white object-cover" />
               <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=64&h=64" alt="User" className="w-6 h-6 rounded-full border-2 border-white object-cover" />
             </div>
-            <span className="text-sm font-medium text-gray-600">Join 10,000+ early users</span>
+            <span className="text-sm font-medium text-gray-600">Join 10,000 users</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold text-black leading-tight tracking-tight">
