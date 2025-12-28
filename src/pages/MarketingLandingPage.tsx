@@ -256,7 +256,7 @@ export function MarketingLandingPage() {
           </div>
           <div className="flex gap-8 text-sm text-gray-500">
             <a href="#" className="hover:text-black transition-colors">Privacy</a>
-            <a href="https://pastoral-supply-662.notion.site/Terms-of-Service-mora-2a32cec59ddf80aca5e3ec91fdf8e529" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors">Terms</a>
+            <a href="https://pastoral-supply-662.notion.site/Terms-of-Service-Mora-2d72cec59ddf80099945c84fe81add84?source=copy_link" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors">Terms</a>
             <a href="#" className="hover:text-black transition-colors">Contact</a>
           </div>
         </div>

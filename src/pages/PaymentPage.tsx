@@ -270,7 +270,7 @@ export function PaymentPage() {
         {/* Footer with Terms of Service */}
         <div className="text-center pt-12 border-t border-gray-200">
           <a
-            href="https://pastoral-supply-662.notion.site/Terms-of-Service-mora-2a32cec59ddf80aca5e3ec91fdf8e529?source=copy_link"
+            href="https://pastoral-supply-662.notion.site/Terms-of-Service-Mora-2d72cec59ddf80099945c84fe81add84?source=copy_link"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-gray-500 hover:text-gray-700 transition-colors"

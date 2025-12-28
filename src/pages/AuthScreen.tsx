@@ -208,7 +208,9 @@ export function AuthScreen() {
                 >
                   By continuing, you agree to our{' '}
                   <a 
-                    href="#" 
+                    href="https://pastoral-supply-662.notion.site/Terms-of-Service-Mora-2d72cec59ddf80099945c84fe81add84?source=copy_link"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="font-semibold"
                     style={{ 
                       background: 'linear-gradient(135deg, #6BCA9A, #6BB8D4, #7AA5E8)',
