@@ -50,7 +50,7 @@ export function PaymentSuccessPage() {
           // Track successful payment
           trackEvent('Payment Completed', {
             user_id: user?.id,
-            amount: 4.99,
+            amount: 7.99,
             currency: 'USD',
             session_id: sessionId,
           });

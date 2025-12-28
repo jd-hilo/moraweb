@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { GradientButton } from '../components/GradientButton';
 import { Check, Lock, Shield, Sparkles, Star, ArrowRight, Zap, TrendingUp } from 'lucide-react';
 import moraIcon from '../assets/moraicon.png';
+import moraLogo from '../assets/mora.png';
 import { trackEvent } from '../lib/mixpanel';
 
 const PROXY_URL = import.meta.env.VITE_PROXY_URL || 'http://localhost:3001';
@@ -43,7 +44,7 @@ export function PaymentPage() {
     try {
       trackEvent('Checkout Started', {
         user_id: userId,
-        amount: 4.99,
+        amount: 7.99,
       });
 
       // Create Stripe Checkout Session
@@ -94,7 +95,7 @@ export function PaymentPage() {
           </div>
 
           <h1 
-            className="text-4xl md:text-6xl font-bold text-black mb-6 leading-tight"
+            className="text-4xl md:text-6xl font-bold text-black mb-2 leading-tight"
             style={{ 
               fontFamily: 'Recoleta, Georgia, serif',
               fontVariantLigatures: 'none',
@@ -107,9 +108,10 @@ export function PaymentPage() {
               Life Simulation
             </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            See your future before you live it. Get instant access to your AI-powered 10-year timeline.
-          </p>
+          <div className="flex items-center justify-center gap-2 mb-8">
+            <span className="text-sm text-gray-500">presented by</span>
+            <img src={moraLogo} alt="Mora" className="h-5" />
+          </div>
 
           {/* Pricing Card - Limited Time Offer */}
           <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-xl relative max-w-md mx-auto mt-12">
@@ -121,7 +123,7 @@ export function PaymentPage() {
             <div className="text-center mb-8 pt-4">
               <p className="text-gray-500 font-medium mb-2">One-time payment</p>
               <div className="flex items-baseline justify-center gap-1 mb-2">
-                <span className="text-6xl font-bold text-black tracking-tight">$4.99</span>
+                <span className="text-6xl font-bold text-black tracking-tight">$7.99</span>
               </div>
               <p className="text-sm text-gray-400 line-through">$29.99 value</p>
             </div>
