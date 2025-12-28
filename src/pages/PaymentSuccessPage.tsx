@@ -58,7 +58,7 @@ export function PaymentSuccessPage() {
                 .from('payments')
                 .insert({
                   user_id: user.id,
-                  amount: 7.99,
+                  amount: 1.00,
                   status: 'completed',
                   stripe_payment_id: paymentIntentId,
                   simulation_id: null, // No simulation ID at payment time
@@ -74,7 +74,7 @@ export function PaymentSuccessPage() {
           // Track successful payment in Mixpanel
           trackEvent('Payment Completed', {
             user_id: user?.id,
-            amount: 7.99,
+            amount: 1.00,
             currency: 'USD',
             session_id: sessionId,
           });

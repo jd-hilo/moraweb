@@ -46,7 +46,7 @@ export function PaymentPage() {
     try {
       trackEvent('Checkout Started', {
         user_id: userId,
-        amount: 7.99,
+        amount: 1.00,
       });
 
       // Create Stripe Checkout Session
@@ -142,7 +142,7 @@ export function PaymentPage() {
             <div className="text-center mb-8 pt-4">
               <p className="text-gray-500 font-medium mb-2">One-time payment</p>
               <div className="flex items-baseline justify-center gap-1 mb-2">
-                <span className="text-6xl font-bold text-black tracking-tight">$7.99</span>
+                <span className="text-6xl font-bold text-black tracking-tight">$1.00</span>
               </div>
               <p className="text-sm text-gray-400 line-through">$29.99 value</p>
             </div>

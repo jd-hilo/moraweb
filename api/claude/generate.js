@@ -5,10 +5,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.VITE_CLAUDE_API_KEY;
+  // Vercel serverless functions need env vars WITHOUT VITE_ prefix
+  const apiKey = process.env.CLAUDE_API_KEY || process.env.VITE_CLAUDE_API_KEY;
 
   if (!apiKey) {
     console.error('Claude API key not configured');
+    console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('CLAUDE')));
     return res.status(500).json({ error: 'Claude API key not configured' });
   }
 
