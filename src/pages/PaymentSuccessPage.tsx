@@ -5,7 +5,9 @@ import { GradientButton } from '../components/GradientButton';
 import { CheckCircle, Sparkles } from 'lucide-react';
 import { trackEvent } from '../lib/mixpanel';
 
-const PROXY_URL = import.meta.env.VITE_PROXY_URL || 'http://localhost:3001';
+// Use relative path in production (Vercel serverless), localhost in dev
+const API_BASE_URL = import.meta.env.VITE_PROXY_URL || 
+  (import.meta.env.PROD ? '' : 'http://localhost:3001');
 
 export function PaymentSuccessPage() {
   const navigate = useNavigate();
@@ -28,7 +30,7 @@ export function PaymentSuccessPage() {
         setUserId(user?.id || null);
 
         // Verify payment with backend
-        const response = await fetch(`${PROXY_URL}/api/stripe/verify-session`, {
+        const response = await fetch(`${API_BASE_URL}/api/stripe/verify-session`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

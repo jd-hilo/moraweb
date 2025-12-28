@@ -7,7 +7,9 @@ import moraIcon from '../assets/moraicon.png';
 import moraLogo from '../assets/mora.png';
 import { trackEvent } from '../lib/mixpanel';
 
-const PROXY_URL = import.meta.env.VITE_PROXY_URL || 'http://localhost:3001';
+// Use relative path in production (Vercel serverless), localhost in dev
+const API_BASE_URL = import.meta.env.VITE_PROXY_URL || 
+  (import.meta.env.PROD ? '' : 'http://localhost:3001');
 
 export function PaymentPage() {
   const navigate = useNavigate();
@@ -48,13 +50,21 @@ export function PaymentPage() {
       });
 
       // Create Stripe Checkout Session
-      const response = await fetch(`${PROXY_URL}/api/stripe/create-checkout-session`, {
+      const apiUrl = `${API_BASE_URL}/api/stripe/create-checkout-session`;
+      console.log('Calling Stripe API:', apiUrl);
+      console.log('API_BASE_URL:', API_BASE_URL);
+      console.log('Is production:', import.meta.env.PROD);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ userId }),
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -74,6 +84,11 @@ export function PaymentPage() {
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
       alert(`Failed to start checkout: ${error.message || 'Please check console for details'}`);
       setIsLoading(false);
     }
