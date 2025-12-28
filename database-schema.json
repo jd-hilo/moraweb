@@ -1,0 +1,990 @@
+[
+  {
+    "table_name": "career_entries",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "company",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "start_date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "end_date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "satisfaction",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "notes",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "source",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": "'manual'::text"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "compatibility_tests",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id_1",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "user_id_2",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "compatibility_score",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "breakdown",
+        "data_type": "jsonb",
+        "is_nullable": "NO",
+        "column_default": "'{}'::jsonb"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "decision_participants",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "decision_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "participant_user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "added_by_user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "decisions",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "question",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "options",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'[]'::jsonb"
+      },
+      {
+        "column_name": "context_summary",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "prediction",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": "'draft'::text"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "decision_embedding",
+        "data_type": "USER-DEFINED",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ]
+  },
+  {
+    "table_name": "interest_questions",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "category",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_a",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_b",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_a_image_url",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_b_image_url",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_a_description",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "option_b_description",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "display_order",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "interest_responses",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "category",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_a",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_b",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_a_image_url",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_b_image_url",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "option_a_description",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "option_b_description",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "selected_option",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "journals",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "mood",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "text",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "profiles",
+    "columns": [
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "hometown",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "family_relationship",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "university",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "major",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "career_entrypoint",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "core_json",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb"
+      },
+      {
+        "column_name": "values_json",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'[]'::jsonb"
+      },
+      {
+        "column_name": "narrative_summary",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "narrative_embedding",
+        "data_type": "USER-DEFINED",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "contribute_to_insights",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true"
+      },
+      {
+        "column_name": "first_name",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "current_location",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "net_worth",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "political_views",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "twin_code",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "is_premium",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false"
+      },
+      {
+        "column_name": "twin_score",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "70"
+      },
+      {
+        "column_name": "twin_score_previous",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "twin_score_last_updated",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "twin_score_events",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "ab_test_group",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "simulation_credits",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "5"
+      },
+      {
+        "column_name": "selected_memoji_url",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ]
+  },
+  {
+    "table_name": "relationships",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "name",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "relationship_type",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "years_known",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "contact_frequency",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "influence",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "location",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "simulations",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "decision_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "scenarios",
+        "data_type": "jsonb",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb"
+      },
+      {
+        "column_name": "summary",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "timelines",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "title",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "current_age",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "stats",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'{\"money\": 5, \"growth\": 5, \"freedom\": 5, \"happiness\": 5, \"relationships\": 5}'::jsonb"
+      },
+      {
+        "column_name": "events",
+        "data_type": "ARRAY",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb[]"
+      },
+      {
+        "column_name": "assets",
+        "data_type": "ARRAY",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb[]"
+      },
+      {
+        "column_name": "twin_profile",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb"
+      },
+      {
+        "column_name": "scenario_count",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "relationships",
+        "data_type": "ARRAY",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb[]"
+      },
+      {
+        "column_name": "current_year",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "1"
+      }
+    ]
+  },
+  {
+    "table_name": "user_interests",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "category",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "item_name",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "item_id",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "item_metadata",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "user_memojis",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "url",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "user_recommendations",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "category",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "recommendation_title",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "recommendation_description",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "rank",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": "1"
+      },
+      {
+        "column_name": "location",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "generated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  },
+  {
+    "table_name": "what_if",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "counterfactual_type",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "payload",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb"
+      },
+      {
+        "column_name": "metrics",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb"
+      },
+      {
+        "column_name": "summary",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "biometrics",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": "'{}'::jsonb"
+      },
+      {
+        "column_name": "twin_alignment_score",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ]
+  },
+  {
+    "table_name": "year_predictions",
+    "columns": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "scenario_type",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "probability_percentage",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "column_name": "prediction_data",
+        "data_type": "jsonb",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": "now()"
+      }
+    ]
+  }
+]
+
