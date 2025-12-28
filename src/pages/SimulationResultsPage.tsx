@@ -428,15 +428,23 @@ export function SimulationResultsPage() {
         {/* Bottom Actions */}
         <div className="flex flex-col items-center gap-4 pt-12 pb-8">
           {isOwner ? (
-            <GradientButton 
-              onClick={handleShare}
-              variant="purple"
-              size="lg"
-              className="flex items-center gap-2"
-            >
-              <Share2 className="w-5 h-5" />
-              Share Simulation
-            </GradientButton>
+            <>
+              <GradientButton 
+                onClick={handleShare}
+                variant="purple"
+                size="lg"
+                className="flex items-center gap-2"
+              >
+                <Share2 className="w-5 h-5" />
+                Share Simulation
+              </GradientButton>
+              <button
+                onClick={() => navigate('/')}
+                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                Return Home
+              </button>
+            </>
           ) : (
             <GradientButton
               onClick={() => navigate('/auth')}
