@@ -40,16 +40,39 @@ export function PaymentSuccessPage() {
 
         const data = await response.json();
 
-        if (data.success) {
-          // Mark user as premium
+        if (data.success && data.session) {
+          // Track successful payment in payments table
           if (user?.id) {
-            await supabase
-              .from('profiles')
-              .update({ is_premium: true })
-              .eq('user_id', user.id);
+            const session = data.session;
+            const paymentIntentId = session.payment_intent || sessionId;
+            
+            // Check if payment already exists to prevent duplicates
+            const { data: existingPayment } = await supabase
+              .from('payments')
+              .select('id')
+              .eq('stripe_payment_id', paymentIntentId)
+              .maybeSingle();
+
+            // Only insert if payment doesn't already exist
+            if (!existingPayment) {
+              const { error: paymentError } = await supabase
+                .from('payments')
+                .insert({
+                  user_id: user.id,
+                  amount: 7.99,
+                  status: 'completed',
+                  stripe_payment_id: paymentIntentId,
+                  simulation_id: null, // No simulation ID at payment time
+                });
+
+              if (paymentError) {
+                console.error('Error recording payment:', paymentError);
+                // Don't fail the flow, but log the error
+              }
+            }
           }
 
-          // Track successful payment
+          // Track successful payment in Mixpanel
           trackEvent('Payment Completed', {
             user_id: user?.id,
             amount: 7.99,
