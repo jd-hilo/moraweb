@@ -26,6 +26,8 @@ import { PoliticsScreen } from './pages/onboarding/PoliticsScreen';
 import { ClarifierScreen } from './pages/onboarding/ClarifierScreen';
 import { CompleteScreen } from './pages/onboarding/CompleteScreen';
 import { PaywallScreen } from './pages/PaywallScreen';
+import { PaymentPage } from './pages/PaymentPage';
+import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { SimulateLifePage } from './pages/SimulateLifePage';
 import { DecideForMePage } from './pages/DecideForMePage';
 import { SimulationResultsPage } from './pages/SimulationResultsPage';
@@ -64,6 +66,8 @@ function App() {
           <Route path="/onboarding/complete" element={<CompleteScreen />} />
 
           <Route path="/paywall" element={<PaywallScreen />} />
+          <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
           <Route path="/simulate-life" element={<SimulateLifePage />} />
           <Route path="/decide-for-me" element={<DecideForMePage />} />
           <Route path="/simulation-results" element={<SimulationResultsPage />} />

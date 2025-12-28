@@ -88,8 +88,8 @@ export function ClarifierScreen() {
         });
       }
 
-      // After saving profile, navigate to simulate life page
-      navigate('/simulate-life');
+      // Profile saved - payment page will handle navigation
+      setIsSaving(false);
     } catch (error) {
       console.error('Error creating digital twin:', error);
       setIsSaving(false);
@@ -102,31 +102,20 @@ export function ClarifierScreen() {
       hideButton
     >
       <div className="text-center space-y-8">
-        <div className="mb-8">
-          <TypewriterText
-            texts={["it's time to create your digital twin"]}
-            speed={60}
-            className="text-3xl md:text-4xl font-serif font-bold text-black"
-          />
+        <div className="animate-slide-up">
+          <GradientButton
+            onClick={async () => {
+              // Save profile data first, then navigate to payment
+              await handleCreateTwin();
+              if (!isSaving) {
+                navigate('/payment');
+              }
+            }}
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Simulate My Life'}
+          </GradientButton>
         </div>
-
-        <div className="min-h-[100px] flex items-center justify-center">
-          <p className="text-xl text-gray-600 animate-pulse">
-            {loadingMessages[currentMessageIndex]}
-          </p>
-        </div>
-
-        {isComplete && (
-          <div className="animate-slide-up">
-            <GradientButton
-              onClick={handleCreateTwin}
-              disabled={isSaving}
-              className="animate-pulse"
-            >
-              {isSaving ? 'Simulating...' : 'Simulate My Life'}
-            </GradientButton>
-          </div>
-        )}
       </div>
     </OnboardingScreen>
   );

@@ -7,6 +7,7 @@ interface TypewriterTextProps {
   className?: string;
   firstLineClassName?: string;
   restLineClassName?: string;
+  lastLineClassName?: string;
   firstLineStyle?: React.CSSProperties;
 }
 
@@ -17,6 +18,7 @@ export function TypewriterText({
   className = '',
   firstLineClassName = '',
   restLineClassName = '',
+  lastLineClassName = '',
   firstLineStyle
 }: TypewriterTextProps) {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
@@ -55,6 +57,9 @@ export function TypewriterText({
     if (index === 0 && firstLineClassName) {
       return firstLineClassName;
     }
+    if (index === texts.length - 1 && lastLineClassName) {
+      return lastLineClassName;
+    }
     return restLineClassName;
   };
 
@@ -74,7 +79,7 @@ export function TypewriterText({
         style={completedTexts.length === 0 && firstLineStyle ? firstLineStyle : undefined}
       >
         {currentText}
-        {!isComplete && <span className="animate-pulse">|</span>}
+        {!isComplete && <span className="animate-pulse">I</span>}
       </div>
     </div>
   );

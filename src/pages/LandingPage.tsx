@@ -12,12 +12,23 @@ export function LandingPage() {
   const [showButton, setShowButton] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user is signed in and redirect to dashboard
+  // Check if user is signed in and has completed onboarding - only then redirect to dashboard
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        navigate('/dashboard');
+        // Check if user has completed onboarding
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('core_json')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        // Only redirect to dashboard if onboarding is complete
+        if (profile && profile.core_json) {
+          navigate('/dashboard');
+        }
+        // Otherwise, stay on welcome page for onboarding
       }
     };
     checkAuth();
@@ -27,8 +38,7 @@ export function LandingPage() {
     "let's build your digital twin",
     "we'll ask you questions to understand who you are",
     "so we can create an accurate digital version of you",
-    "then you can run it through simulations",
-    "to simulate your life's decisions",
+    "so you can run it through simulations",
     "please answer truthfully",
   ];
 
@@ -59,7 +69,7 @@ export function LandingPage() {
         <div className="min-h-[300px]">
           <TypewriterText
             texts={messages}
-            speed={50}
+            speed={30}
             onComplete={handleComplete}
             className="text-xl md:text-3xl text-black leading-snug space-y-4"
             firstLineClassName="font-bold text-2xl md:text-4xl"
@@ -70,6 +80,7 @@ export function LandingPage() {
               fontFeatureSettings: '"liga" off'
             }}
             restLineClassName="font-sans font-normal"
+            lastLineClassName="font-sans font-normal text-base md:text-lg"
           />
         </div>
 
@@ -80,7 +91,7 @@ export function LandingPage() {
                 trackEvent(Events.ONBOARDING_STARTED);
                 navigate('/onboarding/name');
               }}>
-                Continue
+                Begin
               </GradientButton>
             </div>
           </div>
