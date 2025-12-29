@@ -56,6 +56,37 @@ export function MarketingLandingPage() {
   const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
   const [selectedDemo, setSelectedDemo] = useState<typeof demoSimulations[0] | null>(null);
+  const [visibleEvents, setVisibleEvents] = useState<number>(0);
+
+  const animatedEvents = [
+    { year: 2025, event: "Started new remote job", impact: "+$15k Income" },
+    { year: 2026, event: "Moved to a new city", impact: "High Happiness" },
+  ];
+
+  // Animation loop for hero section
+  useEffect(() => {
+    // Wait a bit before starting animation
+    const startTimeout = setTimeout(() => {
+      // Show events one by one
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        currentStep++;
+        setVisibleEvents(currentStep);
+        
+        // After showing all events, wait then show question mark
+        if (currentStep === animatedEvents.length) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setVisibleEvents(-1); // -1 indicates question mark state
+          }, 2000); // Keep events visible for 2s before switching
+        }
+      }, 1500);
+
+      return () => clearInterval(interval);
+    }, 500);
+
+    return () => clearTimeout(startTimeout);
+  }, []);
 
   // Check if user is signed in and redirect to dashboard
   useEffect(() => {
@@ -124,19 +155,66 @@ export function MarketingLandingPage() {
               <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=64&h=64" alt="User" className="w-6 h-6 rounded-full border-2 border-white object-cover" />
               <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=64&h=64" alt="User" className="w-6 h-6 rounded-full border-2 border-white object-cover" />
             </div>
-            <span className="text-sm font-medium text-gray-600">Join 10,000 users</span>
+            <span className="text-sm font-medium text-gray-600">12,567+ Lives Simulated</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-black leading-tight tracking-tight">
-            See your future before <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-turquoise-dark">
-              you live it.
-            </span>
+          <h1 className="text-3xl md:text-5xl font-bold text-black leading-tight tracking-tight">
+            Ready to see your future?
           </h1>
 
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Create an accurate digital twin of yourself and simulate millions of possible life paths. Make better decisions with data, not just intuition.
-          </p>
+          {/* Hero Image/Preview */}
+          <div className="mt-8 mb-8 relative">
+            <div className="bg-gray-900 rounded-2xl p-2 shadow-2xl border border-gray-200 max-w-xl mx-auto transform rotate-1 hover:rotate-0 transition-transform duration-700">
+              <div className="bg-white rounded-xl overflow-hidden">
+                <div className="p-4 bg-gray-50 min-h-[200px]">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-bold font-recoleta text-black">Your Future Timeline</h3>
+                      <p className="text-[10px] text-gray-500">Simulating trajectory...</p>
+                    </div>
+                    <div className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      Live
+                    </div>
+                  </div>
+                  <div className="space-y-2 relative min-h-[120px]">
+                    {visibleEvents !== -1 ? (
+                      animatedEvents.map((event, i) => (
+                        <div 
+                          key={event.year} 
+                          className={`bg-white p-2 rounded-lg shadow-sm border border-gray-100 flex gap-2 items-center transition-all duration-700 absolute w-full left-0 ${
+                            i < visibleEvents 
+                              ? 'opacity-100 translate-y-0' 
+                              : 'opacity-0 translate-y-4'
+                          }`}
+                          style={{
+                            top: `${i * 3.5}rem`,
+                            transitionDelay: `${i * 200}ms`
+                          }}
+                        >
+                          <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 font-bold text-[10px]">
+                            {event.year}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-semibold text-black">{event.event}</p>
+                            <p className="text-[10px] text-gray-500">{event.impact}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-col items-center justify-center animate-fade-in py-2 h-full absolute inset-0">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-turquoise-100 flex items-center justify-center mb-2">
+                          <span className="text-xl">?</span>
+                        </div>
+                        <p className="text-sm font-bold text-black">What happens next?</p>
+                        <p className="text-xs text-gray-500">Only the simulation knows.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <GradientButton 
@@ -156,44 +234,96 @@ export function MarketingLandingPage() {
             </p>
           </div>
 
-          {/* Hero Image/Preview */}
-          <div className="mt-16 relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10" />
-            <div className="bg-gray-900 rounded-2xl p-2 shadow-2xl border border-gray-200 max-w-3xl mx-auto transform rotate-1 hover:rotate-0 transition-transform duration-700">
-              <div className="bg-white rounded-xl overflow-hidden">
-                <div className="p-6 md:p-8 bg-gray-50">
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <h3 className="text-2xl font-bold font-recoleta text-black">Your 10-Year Trajectory</h3>
-                      <p className="text-sm text-gray-500">Based on current parameters</p>
-                    </div>
-                    <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      92% Probability
-                    </div>
+          <div className="mt-12 pt-8 w-full max-w-4xl mx-auto animate-fade-in overflow-hidden" style={{ animationDelay: '0.4s' }}>
+            <p className="text-center text-xs font-semibold text-gray-300 uppercase tracking-widest mb-6">As seen on</p>
+            
+            <div className="relative w-full">
+              {/* Gradient masks */}
+              <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10" />
+              <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10" />
+              
+              <div className="flex w-max animate-scroll pause-on-hover">
+                {/* First set of logos */}
+                <div className="flex items-center gap-16 mx-8 opacity-40 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100">
+                  {/* TikTok */}
+                  <div className="h-8 flex items-center text-black min-w-[100px] justify-center">
+                     <svg className="h-6 w-auto" fill="currentColor" viewBox="0 0 24 24">
+                       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                     </svg>
                   </div>
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4 items-center">
-                        <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 font-bold">
-                          {2024 + i}
-                        </div>
-                        <div className="flex-1">
-                          <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
-                          <div className="h-3 bg-gray-50 rounded w-1/2" />
-                        </div>
-                      </div>
-                    ))}
+                  
+                  {/* TechCrunch */}
+                  <div className="h-6 flex items-center text-[#029f73] min-w-[120px] justify-center">
+                     <span className="text-xl font-bold tracking-tighter font-serif whitespace-nowrap">TechCrunch</span>
+                  </div>
+
+                   {/* Forbes */}
+                  <div className="h-6 flex items-center text-black min-w-[80px] justify-center">
+                     <span className="text-xl font-bold font-serif tracking-tight">Forbes</span>
+                  </div>
+
+                  {/* Product Hunt */}
+                  <div className="h-8 flex items-center gap-2 min-w-[140px] justify-center">
+                     <div className="w-6 h-6 rounded-full bg-[#DA552F] flex items-center justify-center text-white font-bold text-sm shrink-0">P</div>
+                     <span className="text-lg font-bold text-[#DA552F] whitespace-nowrap">Product Hunt</span>
+                  </div>
+
+                  {/* Wired */}
+                  <div className="h-6 flex items-center text-black min-w-[80px] justify-center">
+                     <span className="text-xl font-bold font-mono tracking-tighter border-2 border-black px-1">WIRED</span>
+                  </div>
+
+                  {/* The Verge */}
+                  <div className="h-6 flex items-center text-[#e1005b] min-w-[100px] justify-center">
+                     <span className="text-lg font-bold font-sans tracking-wide uppercase">The Verge</span>
+                  </div>
+                </div>
+
+                {/* Duplicate set for infinite scroll */}
+                <div className="flex items-center gap-16 mx-8 opacity-40 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100">
+                  {/* TikTok */}
+                  <div className="h-8 flex items-center text-black min-w-[100px] justify-center">
+                     <svg className="h-6 w-auto" fill="currentColor" viewBox="0 0 24 24">
+                       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                     </svg>
+                  </div>
+                  
+                  {/* TechCrunch */}
+                  <div className="h-6 flex items-center text-[#029f73] min-w-[120px] justify-center">
+                     <span className="text-xl font-bold tracking-tighter font-serif whitespace-nowrap">TechCrunch</span>
+                  </div>
+
+                   {/* Forbes */}
+                  <div className="h-6 flex items-center text-black min-w-[80px] justify-center">
+                     <span className="text-xl font-bold font-serif tracking-tight">Forbes</span>
+                  </div>
+
+                  {/* Product Hunt */}
+                  <div className="h-8 flex items-center gap-2 min-w-[140px] justify-center">
+                     <div className="w-6 h-6 rounded-full bg-[#DA552F] flex items-center justify-center text-white font-bold text-sm shrink-0">P</div>
+                     <span className="text-lg font-bold text-[#DA552F] whitespace-nowrap">Product Hunt</span>
+                  </div>
+
+                  {/* Wired */}
+                  <div className="h-6 flex items-center text-black min-w-[80px] justify-center">
+                     <span className="text-xl font-bold font-mono tracking-tighter border-2 border-black px-1">WIRED</span>
+                  </div>
+
+                  {/* The Verge */}
+                  <div className="h-6 flex items-center text-[#e1005b] min-w-[100px] justify-center">
+                     <span className="text-lg font-bold font-sans tracking-wide uppercase">The Verge</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Hero Image/Preview removed from here */}
         </div>
       </section>
 
       {/* Sample Simulations Section */}
-      <section className="py-20 bg-white border-b border-gray-100">
+      <section className="hidden md:block py-20 bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-black mb-4 font-recoleta">
@@ -244,7 +374,7 @@ export function MarketingLandingPage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 bg-gray-50">
+      <section className="hidden md:block py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -279,7 +409,7 @@ export function MarketingLandingPage() {
       </section>
 
       {/* Social Proof */}
-      <section className="py-24 bg-white">
+      <section className="hidden md:block py-24 bg-white">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-black mb-16 font-recoleta">
             Trusted by thousands of future-planners
@@ -320,7 +450,7 @@ export function MarketingLandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-black relative overflow-hidden">
+      <section className="hidden md:block py-24 bg-black relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-turquoise-900/20" />
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <img src={moraIcon} alt="Mora" className="w-16 h-16 mx-auto mb-8 opacity-90" />
@@ -422,7 +552,7 @@ export function MarketingLandingPage() {
       )}
 
       {/* Footer */}
-      <footer className="py-12 border-t border-gray-100">
+      <footer className="hidden md:block py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <img src={moraLogo} alt="Mora" className="h-6 opacity-50" />
