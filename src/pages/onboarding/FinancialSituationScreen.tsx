@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const financialOptions = [
   { value: 'comfortable', label: 'Comfortable' },
@@ -20,12 +21,14 @@ export function FinancialSituationScreen() {
     setFinancialSituation(value);
     if (value && value !== 'other') {
       updateData({ financialSituation: value });
+      trackEvent(Events.ONBOARDING_STEP_FINANCIAL_SITUATION);
       navigate('/onboarding/life-stage');
     }
   };
 
   const handleContinue = () => {
     updateData({ financialSituation });
+    trackEvent(Events.ONBOARDING_STEP_FINANCIAL_SITUATION);
     navigate('/onboarding/life-stage');
   };
 

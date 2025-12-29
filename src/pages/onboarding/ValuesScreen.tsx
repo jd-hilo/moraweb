@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { MultiSelectGrid } from '../../components/MultiSelectGrid';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const valueOptions = [
   { value: 'family', label: 'Family' },
@@ -26,6 +27,7 @@ export function ValuesScreen() {
 
   const handleContinue = () => {
     updateData({ values });
+    trackEvent(Events.ONBOARDING_STEP_VALUES);
     navigate('/onboarding/work-status');
   };
 

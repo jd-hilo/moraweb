@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const shapedOptions = [
   { value: 'family', label: 'Family' },
@@ -21,12 +22,14 @@ export function ShapedMostScreen() {
     setShapedMost(value);
     if (value && value !== 'other') {
       updateData({ shapedMost: value });
+      trackEvent(Events.ONBOARDING_STEP_SHAPED_MOST);
       navigate('/onboarding/challenges');
     }
   };
 
   const handleContinue = () => {
     updateData({ shapedMost });
+    trackEvent(Events.ONBOARDING_STEP_SHAPED_MOST);
     navigate('/onboarding/challenges');
   };
 

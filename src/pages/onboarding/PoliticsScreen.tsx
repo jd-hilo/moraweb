@@ -4,6 +4,7 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
 import { StatMessage } from '../../components/StatMessage';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const politicsOptions = [
   { value: 'progressive', label: 'Progressive' },
@@ -24,12 +25,14 @@ export function PoliticsScreen() {
     setPolitics(value);
     if (value && value !== 'other') {
       updateData({ politics: value });
+      trackEvent(Events.ONBOARDING_STEP_POLITICS);
       navigate('/onboarding/clarifier');
     }
   };
 
   const handleContinue = () => {
     updateData({ politics });
+    trackEvent(Events.ONBOARDING_STEP_POLITICS);
     navigate('/onboarding/clarifier');
   };
 

@@ -4,6 +4,7 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
 import { StatMessage } from '../../components/StatMessage';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const decisionOptions = [
   { value: 'analytical', label: 'Analytical - I research and weigh pros/cons' },
@@ -22,12 +23,14 @@ export function DecisionStyleScreen() {
     setDecisionStyle(value);
     if (value && value !== 'other') {
       updateData({ decisionStyle: value });
+      trackEvent(Events.ONBOARDING_STEP_DECISION_STYLE);
       navigate('/onboarding/stress-handling');
     }
   };
 
   const handleContinue = () => {
     updateData({ decisionStyle });
+    trackEvent(Events.ONBOARDING_STEP_DECISION_STYLE);
     navigate('/onboarding/stress-handling');
   };
 

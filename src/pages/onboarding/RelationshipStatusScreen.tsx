@@ -4,6 +4,7 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { HappinessSlider } from '../../components/HappinessSlider';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const relationshipOptions = [
   { value: 'single', label: 'Single' },
@@ -36,6 +37,7 @@ export function RelationshipStatusScreen() {
       partnerName: isInRelationship ? partnerName : undefined,
       relationshipHappiness: isInRelationship ? relationshipHappiness : undefined,
     });
+    trackEvent(Events.ONBOARDING_STEP_RELATIONSHIP_STATUS);
     navigate('/onboarding/financial-situation');
   };
 

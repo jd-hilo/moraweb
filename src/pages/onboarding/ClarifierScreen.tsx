@@ -94,6 +94,8 @@ export function ClarifierScreen() {
           <div className="animate-fade-in">
             <GradientButton
               onClick={async () => {
+                // Track step completion
+                trackEvent(Events.ONBOARDING_STEP_CLARIFIER);
                 // Save profile data first, then navigate to payment
                 await handleCreateTwin();
                 if (!isSaving) {

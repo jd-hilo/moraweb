@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 export function HometownScreen() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export function HometownScreen() {
 
   const handleContinue = () => {
     updateData({ hometown });
+    trackEvent(Events.ONBOARDING_STEP_HOMETOWN);
     navigate('/onboarding/college');
   };
 

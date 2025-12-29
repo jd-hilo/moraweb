@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 export function StressHandlingScreen() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export function StressHandlingScreen() {
 
   const handleContinue = () => {
     updateData({ stressHandling });
+    trackEvent(Events.ONBOARDING_STEP_STRESS_HANDLING);
     navigate('/onboarding/politics');
   };
 

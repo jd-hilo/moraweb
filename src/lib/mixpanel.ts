@@ -60,6 +60,28 @@ export const Events = {
   ONBOARDING_COMPLETED: 'Onboarding Completed',
   TWIN_CREATED: 'Twin Created',
   
+  // Onboarding step events - web
+  ONBOARDING_STEP_NAME: 'Onboarding Step Completed - Name - web',
+  ONBOARDING_STEP_BIRTH_YEAR: 'Onboarding Step Completed - Birth Year - web',
+  ONBOARDING_STEP_VALUES: 'Onboarding Step Completed - Values - web',
+  ONBOARDING_STEP_WORK_STATUS: 'Onboarding Step Completed - Work Status - web',
+  ONBOARDING_STEP_LIVING_SITUATION: 'Onboarding Step Completed - Living Situation - web',
+  ONBOARDING_STEP_RELATIONSHIP_STATUS: 'Onboarding Step Completed - Relationship Status - web',
+  ONBOARDING_STEP_FINANCIAL_SITUATION: 'Onboarding Step Completed - Financial Situation - web',
+  ONBOARDING_STEP_LIFE_STAGE: 'Onboarding Step Completed - Life Stage - web',
+  ONBOARDING_STEP_GOALS: 'Onboarding Step Completed - Goals - web',
+  ONBOARDING_STEP_INTERESTS: 'Onboarding Step Completed - Interests - web',
+  ONBOARDING_STEP_HOMETOWN: 'Onboarding Step Completed - Hometown - web',
+  ONBOARDING_STEP_COLLEGE: 'Onboarding Step Completed - College - web',
+  ONBOARDING_STEP_CAREER_START: 'Onboarding Step Completed - Career Start - web',
+  ONBOARDING_STEP_TURNING_POINT: 'Onboarding Step Completed - Turning Point - web',
+  ONBOARDING_STEP_SHAPED_MOST: 'Onboarding Step Completed - Shaped Most - web',
+  ONBOARDING_STEP_CHALLENGES: 'Onboarding Step Completed - Challenges - web',
+  ONBOARDING_STEP_DECISION_STYLE: 'Onboarding Step Completed - Decision Style - web',
+  ONBOARDING_STEP_STRESS_HANDLING: 'Onboarding Step Completed - Stress Handling - web',
+  ONBOARDING_STEP_POLITICS: 'Onboarding Step Completed - Politics - web',
+  ONBOARDING_STEP_CLARIFIER: 'Onboarding Step Completed - Clarifier - web',
+  
   // Simulation events
   SIMULATION_STARTED: 'Simulation Started',
   SIMULATION_GENERATED: 'Simulation Generated',

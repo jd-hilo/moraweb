@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const collegeOptions = [
   { value: 'yes', label: 'Yes' },
@@ -20,6 +21,7 @@ export function CollegeScreen() {
       wentToCollege,
       collegeName: wentToCollege === 'yes' ? collegeName : undefined,
     });
+    trackEvent(Events.ONBOARDING_STEP_COLLEGE);
     navigate('/onboarding/career-start');
   };
 

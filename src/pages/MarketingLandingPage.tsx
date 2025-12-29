@@ -2,14 +2,60 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { GradientButton } from '../components/GradientButton';
-import { Star, TrendingUp, Shield, Users, Clock, ArrowRight } from 'lucide-react';
+import { Star, TrendingUp, Shield, Users, Clock, ArrowRight, PlayCircle, X } from 'lucide-react';
 import moraLogo from '../assets/mora.png';
 import moraIcon from '../assets/moraicon.png';
 import { trackEvent, Events } from '../lib/mixpanel';
 
+const demoSimulations = [
+  {
+    id: 1,
+    title: "The Career Pivot",
+    role: "Marketing Manager",
+    scenario: "Transitioning to Tech",
+    preview: "Success Probability: 87%",
+    details: {
+      year1: "Complete coding bootcamp while working part-time. Income drops by 40%.",
+      year5: "Senior Developer at mid-sized fintech. Income 2x previous role.",
+      year10: "CTO of Series B startup. High stress, high reward.",
+      netWorth: "$1.2M",
+      happiness: "8.5/10"
+    }
+  },
+  {
+    id: 2,
+    title: "The Big Move",
+    role: "Designer",
+    scenario: "Relocating to Bali",
+    preview: "Lifestyle Match: 94%",
+    details: {
+      year1: "Adjustment period. Lower cost of living allows for significant savings.",
+      year5: "Established remote agency. Strong community network built.",
+      year10: "Owning property in multiple countries. Freedom maximized.",
+      netWorth: "$850k",
+      happiness: "9.2/10"
+    }
+  },
+  {
+    id: 3,
+    title: "The Startup Gamble",
+    role: "Corporate Exec",
+    scenario: "Bootstrapping SaaS",
+    preview: "Success Chance: 42%",
+    details: {
+      year1: "Burn rate high. Living off savings. Product launch in Q4.",
+      year5: "Profitable niche business. Team of 12. Moderate acquisition offers.",
+      year10: "Successful exit or sustainable lifestyle business. Legacy built.",
+      netWorth: "$3.5M",
+      happiness: "7.8/10"
+    }
+  }
+];
+
 export function MarketingLandingPage() {
   const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
+  const [selectedDemo, setSelectedDemo] = useState<typeof demoSimulations[0] | null>(null);
 
   // Check if user is signed in and redirect to dashboard
   useEffect(() => {
@@ -146,6 +192,57 @@ export function MarketingLandingPage() {
         </div>
       </section>
 
+      {/* Sample Simulations Section */}
+      <section className="py-20 bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-black mb-4 font-recoleta">
+              See what your simulation looks like
+            </h2>
+            <p className="text-lg text-gray-600">
+              Real examples of how Mora predicts your future path
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {demoSimulations.map((sim) => (
+              <div 
+                key={sim.id}
+                onClick={() => setSelectedDemo(sim)}
+                className="group cursor-pointer bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:border-purple-200 transition-all duration-300 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="bg-white rounded-full p-2 shadow-sm">
+                    <ArrowRight className="w-4 h-4 text-purple-600" />
+                  </div>
+                </div>
+                
+                <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <PlayCircle className="w-6 h-6 text-purple-600" />
+                </div>
+                
+                <h3 className="text-lg font-bold text-black mb-1">{sim.title}</h3>
+                <p className="text-sm text-gray-500 mb-4">{sim.scenario}</p>
+                
+                <div className="bg-white rounded-lg p-3 border border-gray-100 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-500">Projection</span>
+                    <span className="text-xs font-bold text-green-600">{sim.preview}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                    <div className="bg-gradient-to-r from-purple-500 to-turquoise-500 h-1.5 rounded-full" style={{ width: '85%' }}></div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2 text-xs text-gray-400 group-hover:text-purple-600 transition-colors">
+                  <span className="font-medium">View full trajectory</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Grid */}
       <section className="py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6">
@@ -246,6 +343,83 @@ export function MarketingLandingPage() {
           </GradientButton>
         </div>
       </section>
+
+      {/* Demo Modal */}
+      {selectedDemo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedDemo(null)} />
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative z-10 animate-slide-up shadow-2xl">
+            <button 
+              onClick={() => setSelectedDemo(null)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="w-6 h-6 text-gray-400" />
+            </button>
+            
+            <div className="p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center">
+                  <TrendingUp className="w-8 h-8 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold font-recoleta text-black">{selectedDemo.title}</h3>
+                  <p className="text-gray-500">{selectedDemo.scenario}</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                  <h4 className="font-bold text-black mb-4 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-purple-600" />
+                    Projected Timeline
+                  </h4>
+                  <div className="space-y-4 relative pl-4 border-l-2 border-purple-100">
+                    <div className="relative">
+                      <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-purple-600 ring-4 ring-white" />
+                      <p className="text-xs font-bold text-purple-600 mb-1">Year 1</p>
+                      <p className="text-gray-700 text-sm">{selectedDemo.details.year1}</p>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-purple-400 ring-4 ring-white" />
+                      <p className="text-xs font-bold text-purple-600 mb-1">Year 5</p>
+                      <p className="text-gray-700 text-sm">{selectedDemo.details.year5}</p>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-turquoise-500 ring-4 ring-white" />
+                      <p className="text-xs font-bold text-turquoise-600 mb-1">Year 10</p>
+                      <p className="text-gray-700 text-sm">{selectedDemo.details.year10}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-green-50 rounded-xl p-4 border border-green-100">
+                    <p className="text-xs text-green-600 font-bold mb-1">Projected Net Worth</p>
+                    <p className="text-xl font-bold text-green-700">{selectedDemo.details.netWorth}</p>
+                  </div>
+                  <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <p className="text-xs text-blue-600 font-bold mb-1">Happiness Score</p>
+                    <p className="text-xl font-bold text-blue-700">{selectedDemo.details.happiness}</p>
+                  </div>
+                </div>
+
+                <div className="pt-4 text-center">
+                   <GradientButton 
+                    onClick={() => {
+                      trackEvent(Events.GET_STARTED_CLICKED, { source: 'demo_modal' });
+                      navigate('/welcome');
+                    }}
+                    className="w-full"
+                    variant="purple"
+                  >
+                    Simulate My Life Now
+                  </GradientButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="py-12 border-t border-gray-100">

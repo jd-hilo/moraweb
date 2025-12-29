@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const livingOptions = [
   { value: 'alone', label: 'Alone' },
@@ -20,12 +21,14 @@ export function LivingSituationScreen() {
     setLivingWith(value);
     if (value && value !== 'other') {
       updateData({ livingWith: value });
+      trackEvent(Events.ONBOARDING_STEP_LIVING_SITUATION);
       navigate('/onboarding/relationship-status');
     }
   };
 
   const handleContinue = () => {
     updateData({ livingWith });
+    trackEvent(Events.ONBOARDING_STEP_LIVING_SITUATION);
     navigate('/onboarding/relationship-status');
   };
 

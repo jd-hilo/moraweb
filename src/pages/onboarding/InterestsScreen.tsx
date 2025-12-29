@@ -4,6 +4,7 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { MultiSelectGrid } from '../../components/MultiSelectGrid';
 import { useOnboarding } from '../../context/OnboardingContext';
 import { StatMessage } from '../../components/StatMessage';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const interestOptions = [
   { value: 'music', label: 'Music', emoji: '🎵' },
@@ -28,6 +29,7 @@ export function InterestsScreen() {
 
   const handleContinue = () => {
     updateData({ interests });
+    trackEvent(Events.ONBOARDING_STEP_INTERESTS);
     navigate('/onboarding/hometown');
   };
 

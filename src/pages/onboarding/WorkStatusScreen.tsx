@@ -4,6 +4,7 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { HappinessSlider } from '../../components/HappinessSlider';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const workOptions = [
   { value: 'employed-full', label: 'Employed full-time' },
@@ -29,6 +30,7 @@ export function WorkStatusScreen() {
       jobTitle: isEmployed ? jobTitle : undefined,
       jobHappiness: isEmployed ? jobHappiness : undefined,
     });
+    trackEvent(Events.ONBOARDING_STEP_WORK_STATUS);
     navigate('/onboarding/living-situation');
   };
 

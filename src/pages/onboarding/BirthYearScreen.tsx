@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 export function BirthYearScreen() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export function BirthYearScreen() {
 
   const handleContinue = () => {
     updateData({ birthYear });
+    trackEvent(Events.ONBOARDING_STEP_BIRTH_YEAR);
     navigate('/onboarding/values');
   };
 

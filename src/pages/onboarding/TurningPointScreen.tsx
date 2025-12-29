@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const turningPointOptions = [
   { value: 'graduation', label: 'Graduation' },
@@ -21,12 +22,14 @@ export function TurningPointScreen() {
     setTurningPoint(value);
     if (value && value !== 'other') {
       updateData({ turningPoint: value });
+      trackEvent(Events.ONBOARDING_STEP_TURNING_POINT);
       navigate('/onboarding/shaped-most');
     }
   };
 
   const handleContinue = () => {
     updateData({ turningPoint });
+    trackEvent(Events.ONBOARDING_STEP_TURNING_POINT);
     navigate('/onboarding/shaped-most');
   };
 

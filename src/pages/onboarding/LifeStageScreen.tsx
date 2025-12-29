@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const lifeStageOptions = [
   { value: 'early-career', label: 'Early career' },
@@ -20,12 +21,14 @@ export function LifeStageScreen() {
     setLifeStage(value);
     if (value && value !== 'other') {
       updateData({ lifeStage: value });
+      trackEvent(Events.ONBOARDING_STEP_LIFE_STAGE);
       navigate('/onboarding/goals');
     }
   };
 
   const handleContinue = () => {
     updateData({ lifeStage });
+    trackEvent(Events.ONBOARDING_STEP_LIFE_STAGE);
     navigate('/onboarding/goals');
   };
 

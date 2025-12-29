@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { trackEvent, Events } from '../../lib/mixpanel';
 
 const careerOptions = [
   { value: 'first-job', label: 'First job' },
@@ -21,12 +22,14 @@ export function CareerStartScreen() {
     setCareerStart(value);
     if (value && value !== 'other') {
       updateData({ careerStart: value });
+      trackEvent(Events.ONBOARDING_STEP_CAREER_START);
       navigate('/onboarding/turning-point');
     }
   };
 
   const handleContinue = () => {
     updateData({ careerStart });
+    trackEvent(Events.ONBOARDING_STEP_CAREER_START);
     navigate('/onboarding/turning-point');
   };
 
