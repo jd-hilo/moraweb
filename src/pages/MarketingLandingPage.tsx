@@ -54,7 +54,7 @@ export function MarketingLandingPage() {
             <GradientButton 
               onClick={() => {
                 trackEvent(Events.GET_STARTED_CLICKED, { source: 'nav' });
-                navigate('/auth');
+                navigate('/welcome');
               }}
               size="sm"
               variant="purple"
@@ -96,7 +96,7 @@ export function MarketingLandingPage() {
             <GradientButton 
               onClick={() => {
                 trackEvent(Events.GET_STARTED_CLICKED, { source: 'hero' });
-                navigate('/auth');
+                navigate('/welcome');
               }}
               size="lg"
               variant="purple"
@@ -236,7 +236,7 @@ export function MarketingLandingPage() {
           <GradientButton 
             onClick={() => {
               trackEvent(Events.GET_STARTED_CLICKED, { source: 'cta' });
-              navigate('/auth');
+              navigate('/welcome');
             }}
             size="lg"
             variant="turquoise"

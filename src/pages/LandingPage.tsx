@@ -54,7 +54,7 @@ export function LandingPage() {
         <img src={moraLogo} alt="Mora" className="w-24 h-24 rounded-lg object-contain" />
       </div>
 
-      <div className="absolute top-8 right-8">
+      <div className="absolute top-8 right-8 flex items-center" style={{ height: '96px' }}>
         <div className="flex flex-col items-end gap-1">
           <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
@@ -89,7 +89,7 @@ export function LandingPage() {
             <div className="flex justify-center">
               <GradientButton onClick={() => {
                 trackEvent(Events.ONBOARDING_STARTED);
-                navigate('/onboarding/name');
+                navigate('/auth');
               }}>
                 Begin
               </GradientButton>

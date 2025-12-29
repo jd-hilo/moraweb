@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { CheckCircle } from 'lucide-react';
-import { trackEvent } from '../lib/mixpanel';
+import { trackEvent, Events } from '../lib/mixpanel';
 
 // Use relative path in production (Vercel serverless), localhost in dev
 const API_BASE_URL = import.meta.env.VITE_PROXY_URL || 
@@ -72,9 +72,9 @@ export function PaymentSuccessPage() {
           }
 
           // Track successful payment in Mixpanel
-          trackEvent('Payment Completed', {
+          trackEvent(Events.PURCHASE_COMPLETED, {
             user_id: user?.id,
-            amount: 1.00,
+            amount: 4.99,
             currency: 'USD',
             session_id: sessionId,
           });

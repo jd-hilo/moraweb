@@ -52,14 +52,14 @@ export function AuthScreen() {
 
         if (isNewUser || !profile || !profile.core_json) {
           // New user signing up OR existing user without completed onboarding
-          // Always route to welcome screen for onboarding
+          // Route directly to onboarding
           trackEvent(Events.SIGN_UP_COMPLETED, { 
             user_id: signInData.user.id,
             email: signInData.user.email,
             is_new_user: isNewUser
           });
           setIsLoading(false);
-          navigate('/welcome');
+          navigate('/onboarding/name');
           return;
         }
 
@@ -86,14 +86,14 @@ export function AuthScreen() {
       }
 
       if (signUpData.user) {
-        // New user signing up - always route to welcome screen for onboarding
+        // New user signing up - route directly to onboarding
         identifyUser(signUpData.user.id, { email: signUpData.user.email });
         trackEvent(Events.SIGN_UP_COMPLETED, { 
           user_id: signUpData.user.id,
           email: signUpData.user.email 
         });
         setIsLoading(false);
-        navigate('/welcome');
+        navigate('/onboarding/name');
         return;
       }
     } catch (err: any) {

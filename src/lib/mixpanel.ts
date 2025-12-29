@@ -77,8 +77,12 @@ export const Events = {
   // Share events
   SHARE_MODAL_SHOWN: 'Share Modal Shown',
   SHARE_LINK_COPIED: 'Share Link Copied',
+  
+  // Payment events
+  PURCHASE_COMPLETED: 'Purchase Completed',
 } as const;
 
 export default mixpanel;
+
 
 

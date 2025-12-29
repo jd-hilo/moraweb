@@ -63,3 +63,4 @@ ClarifierScreen → PaymentPage → Stripe Checkout → Success → SimulateLife
 - ✅ Mobile-responsive design
 
 
+
