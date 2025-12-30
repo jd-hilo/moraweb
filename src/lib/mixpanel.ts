@@ -101,7 +101,7 @@ export const Events = {
   SHARE_LINK_COPIED: 'Share Link Copied',
   
   // Payment events
-  PURCHASE_COMPLETED: 'Purchase Completed',
+  PAYMENT_COMPLETED: 'Payment Completed',
 } as const;
 
 export default mixpanel;

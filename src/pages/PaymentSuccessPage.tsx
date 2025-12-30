@@ -72,7 +72,7 @@ export function PaymentSuccessPage() {
           }
 
           // Track successful payment in Mixpanel
-          trackEvent(Events.PURCHASE_COMPLETED, {
+          trackEvent(Events.PAYMENT_COMPLETED, {
             user_id: user?.id,
             amount: 4.99,
             currency: 'USD',
