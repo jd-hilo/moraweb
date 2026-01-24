@@ -32,6 +32,7 @@ import { SimulateLifePage } from './pages/SimulateLifePage';
 import { DecideForMePage } from './pages/DecideForMePage';
 import { SimulationResultsPage } from './pages/SimulationResultsPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { InvestorsPage } from './pages/InvestorsPage';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Routes>
           <Route path="/" element={<MarketingLandingPage />} />
           <Route path="/welcome" element={<LandingPage />} />
+          <Route path="/investors" element={<InvestorsPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/auth" element={<AuthScreen />} />
 
