@@ -45,6 +45,7 @@ export function CollegeScreen() {
           <div className="animate-slide-up">
             <input
               type="text"
+              enterKeyHint="done"
               value={collegeName}
               onChange={(e) => setCollegeName(e.target.value)}
               placeholder="What college did you attend?"

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { MultiSelectGrid } from '../../components/MultiSelectGrid';
+import { MicroSlide } from '../../components/MicroSlide';
 import { useOnboarding } from '../../context/OnboardingContext';
-import { StatMessage } from '../../components/StatMessage';
+import { useOnboardingProgress } from '../../hooks/useOnboardingProgress';
 import { trackEvent, Events } from '../../lib/mixpanel';
 
 const interestOptions = [
@@ -25,7 +26,8 @@ export function InterestsScreen() {
   const navigate = useNavigate();
   const { data, updateData } = useOnboarding();
   const [interests, setInterests] = useState<string[]>(data.interests);
-  const [showStat, setShowStat] = useState(true);
+  const { microSlide } = useOnboardingProgress();
+  const [showMicroSlide, setShowMicroSlide] = useState(!!microSlide);
 
   const handleContinue = () => {
     updateData({ interests });
@@ -35,10 +37,10 @@ export function InterestsScreen() {
 
   return (
     <>
-      {showStat && (
-        <StatMessage
-          icon="✨"
-          text="We've simulated over 10,000 lives so far"
+      {showMicroSlide && microSlide && (
+        <MicroSlide
+          message={microSlide}
+          onComplete={() => setShowMicroSlide(false)}
         />
       )}
       <OnboardingScreen

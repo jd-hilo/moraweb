@@ -32,6 +32,7 @@ export function DecideForMePage() {
 
         <div className="space-y-4">
           <textarea
+            enterKeyHint="done"
             value={decision}
             onChange={(e) => setDecision(e.target.value)}
             placeholder="Describe your decision... (e.g., Should I take the new job offer or stay at my current company?)"

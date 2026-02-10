@@ -103,6 +103,7 @@ export function InvestorsPage() {
               <div className="animate-slide-up space-y-6">
                 <input
                   type="email"
+                  enterKeyHint="done"
                   placeholder="Enter your email to begin"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -129,6 +130,7 @@ export function InvestorsPage() {
                 <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Firm Name</label>
                 <input
                   type="text"
+                  enterKeyHint="done"
                   value={formData.firmName}
                   onChange={(e) => setFormData({...formData, firmName: e.target.value})}
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 text-lg focus:outline-none focus:ring-2 focus:ring-black/5"
@@ -140,6 +142,7 @@ export function InvestorsPage() {
                 <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">AUM / Stage</label>
                 <input
                   type="text"
+                  enterKeyHint="done"
                   value={formData.aum}
                   onChange={(e) => setFormData({...formData, aum: e.target.value})}
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 text-lg focus:outline-none focus:ring-2 focus:ring-black/5"
@@ -151,6 +154,7 @@ export function InvestorsPage() {
                 <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Primary Focus</label>
                 <input
                   type="text"
+                  enterKeyHint="done"
                   value={formData.focus}
                   onChange={(e) => setFormData({...formData, focus: e.target.value})}
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 text-lg focus:outline-none focus:ring-2 focus:ring-black/5"
@@ -162,6 +166,7 @@ export function InvestorsPage() {
                 <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Website / Link</label>
                 <input
                   type="text"
+                  enterKeyHint="done"
                   value={formData.link}
                   onChange={(e) => setFormData({...formData, link: e.target.value})}
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 text-lg focus:outline-none focus:ring-2 focus:ring-black/5"

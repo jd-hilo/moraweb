@@ -64,6 +64,7 @@ export function RelationshipStatusScreen() {
           <div className="space-y-4 animate-slide-up">
             <input
               type="text"
+              enterKeyHint="done"
               value={singleLength}
               onChange={(e) => setSingleLength(e.target.value)}
               placeholder="How long have you been single?"
@@ -78,6 +79,7 @@ export function RelationshipStatusScreen() {
             {singleLength && (
               <input
                 type="text"
+                enterKeyHint="done"
                 value={beenInRelationship}
                 onChange={(e) => setBeenInRelationship(e.target.value)}
                 placeholder="Have you been in a relationship before?"
@@ -92,6 +94,7 @@ export function RelationshipStatusScreen() {
             )}
             {beenInRelationship && (
               <textarea
+                enterKeyHint="done"
                 value={lookingFor}
                 onChange={(e) => setLookingFor(e.target.value)}
                 placeholder="What are you looking for?"
@@ -120,6 +123,7 @@ export function RelationshipStatusScreen() {
           <div className="space-y-4 animate-slide-up">
             <input
               type="text"
+              enterKeyHint="done"
               value={relationshipLength}
               onChange={(e) => setRelationshipLength(e.target.value)}
               placeholder="How long have you been together?"
@@ -134,6 +138,7 @@ export function RelationshipStatusScreen() {
             {relationshipLength && (
               <input
                 type="text"
+                enterKeyHint="done"
                 value={partnerName}
                 onChange={(e) => setPartnerName(e.target.value)}
                 placeholder="What's your partner's first name?"

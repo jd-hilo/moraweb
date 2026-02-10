@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 export interface OnboardingData {
+  simulationType?: string; // 'career', 'relationship', or 'social'
   firstName: string;
   birthYear: string;
   values: string[];
@@ -29,6 +30,23 @@ export interface OnboardingData {
   decisionStyle: string;
   stressHandling?: string;
   politics: string;
+
+  // Career simulation specific fields
+  careerTimeHorizon?: 5 | 10 | 15;
+  careerPriorities?: string;
+  careerGoals?: string[];
+  workStyle?: string;
+  riskTolerance?: string;
+  isStudent?: boolean;
+  gradeLevel?: string;
+  school?: string;
+  studying?: string;
+  currentRole?: string;
+  company?: string;
+  salary?: string;
+
+  // Career paywall - collected before checkout
+  email?: string;
 }
 
 interface OnboardingContextType {
@@ -38,6 +56,7 @@ interface OnboardingContextType {
 }
 
 const defaultData: OnboardingData = {
+  simulationType: '',
   firstName: '',
   birthYear: '',
   values: [],

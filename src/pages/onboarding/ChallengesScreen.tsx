@@ -22,6 +22,7 @@ export function ChallengesScreen() {
       onContinue={handleContinue}
     >
       <textarea
+        enterKeyHint="done"
         value={challenges}
         onChange={(e) => setChallenges(e.target.value)}
         placeholder="Tell us about challenges you've faced... (optional)"

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
+import { MicroSlide } from '../../components/MicroSlide';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { useOnboardingProgress } from '../../hooks/useOnboardingProgress';
 import { trackEvent, Events } from '../../lib/mixpanel';
 
 const shapedOptions = [
@@ -17,6 +19,8 @@ export function ShapedMostScreen() {
   const navigate = useNavigate();
   const { data, updateData } = useOnboarding();
   const [shapedMost, setShapedMost] = useState(data.shapedMost);
+  const { microSlide } = useOnboardingProgress();
+  const [showMicroSlide, setShowMicroSlide] = useState(!!microSlide);
 
   const handleChange = (value: string) => {
     setShapedMost(value);
@@ -34,19 +38,27 @@ export function ShapedMostScreen() {
   };
 
   return (
-    <OnboardingScreen
-      progress={62}
-      title="What shaped you the most?"
-      onContinue={handleContinue}
-      continueDisabled={!shapedMost}
-      hideButton={shapedMost && shapedMost !== 'other'}
-    >
-      <ChoiceQuestion
-        options={shapedOptions}
-        value={shapedMost}
-        onChange={handleChange}
-        allowOther
-      />
-    </OnboardingScreen>
+    <>
+      {showMicroSlide && microSlide && (
+        <MicroSlide
+          message={microSlide}
+          onComplete={() => setShowMicroSlide(false)}
+        />
+      )}
+      <OnboardingScreen
+        progress={62}
+        title="What shaped you the most?"
+        onContinue={handleContinue}
+        continueDisabled={!shapedMost}
+        hideButton={!!(shapedMost && shapedMost !== 'other')}
+      >
+        <ChoiceQuestion
+          options={shapedOptions}
+          value={shapedMost}
+          onChange={handleChange}
+          allowOther
+        />
+      </OnboardingScreen>
+    </>
   );
 }

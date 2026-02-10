@@ -78,17 +78,8 @@ export function SimulateLifePage() {
     setCurrentMessageIndex(0);
 
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-
-      if (userError || !userData.user) {
-        console.error('User not authenticated');
-        setIsGenerating(false);
-        setShowButton(true);
-        return;
-      }
-
+      // No auth required - users can create simulations without an account
       trackEvent(Events.SIMULATION_STARTED, {
-        user_id: userData.user.id,
         is_auto_run: !!location.state?.autoRun,
       });
 
@@ -101,37 +92,51 @@ export function SimulateLifePage() {
         hasTenYear: !!simulationData.ten_year,
       });
 
-      const { data: simulation, error: simulationError } = await supabase
-        .from('websims')
-        .insert({
-          user_id: userData.user.id,
-          scenarios: simulationData,
-          summary: 'Life simulation based on digital twin',
-        })
-        .select()
-        .single();
+      // Try to save simulation to database (user_id is nullable)
+      // If save fails, we'll still show results using the data directly
+      let simulationId: string | null = null;
+      
+      try {
+        const simulationType = onboardingData.simulationType || 'career';
+        const simulationTypeLabels: Record<string, string> = {
+          career: 'Career',
+          relationship: 'Relationship',
+          social: 'Social Life',
+        };
+        
+        const { data: simulation, error: simulationError } = await supabase
+          .from('websims')
+          .insert({
+            user_id: null, // Anonymous user - no account required
+            scenarios: simulationData,
+            summary: `${simulationTypeLabels[simulationType] || 'Life'} simulation based on digital twin`,
+          })
+          .select()
+          .single();
 
-      if (simulationError) {
-        console.error('Error creating simulation:', simulationError);
-        setIsGenerating(false);
-        setShowButton(true);
-        return;
+        if (!simulationError && simulation) {
+          simulationId = simulation.id;
+        }
+      } catch (dbError) {
+        console.warn('Could not save simulation to database (continuing anyway):', dbError);
+        // Continue without database save - we'll use the data directly
       }
 
       // Track simulation generation success
       trackEvent(Events.SIMULATION_GENERATED, {
-        user_id: userData.user.id,
-        simulation_id: simulation.id,
+        simulation_id: simulationId,
         has_one_year: !!simulationData.one_year?.length,
         has_three_year: !!simulationData.three_year?.length,
         has_five_year: !!simulationData.five_year?.length,
         has_ten_year: !!simulationData.ten_year?.length,
       });
 
-      // Navigate directly to results (skip paywall) and replace state to prevent back button issues
+      // Navigate to results with simulation data
+      // If we have an ID, use it; otherwise pass the data directly
       navigate('/simulation-results', {
         state: {
-          simulationId: simulation.id,
+          simulationId: simulationId,
+          simulationData: simulationId ? undefined : simulationData, // Pass data if no ID
           timestamp: Date.now(), // Add timestamp to force fresh load
         },
         replace: true, // Replace current history entry

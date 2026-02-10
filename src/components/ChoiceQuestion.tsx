@@ -62,6 +62,7 @@ export function ChoiceQuestion({
           {isOtherSelected && (
             <input
               type="text"
+              enterKeyHint="done"
               value={otherValue || (value !== 'other' ? value : '')}
               onChange={(e) => handleOtherChange(e.target.value)}
               placeholder={otherPlaceholder}

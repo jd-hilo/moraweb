@@ -4,7 +4,6 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { TypewriterText } from '../../components/TypewriterText';
 import { GradientButton } from '../../components/GradientButton';
 import { useOnboarding } from '../../context/OnboardingContext';
-import { supabase } from '../../lib/supabase';
 import { trackEvent, Events } from '../../lib/mixpanel';
 
 export function ClarifierScreen() {
@@ -17,53 +16,15 @@ export function ClarifierScreen() {
     setIsSaving(true);
 
     try {
-      const aiSummary = `${data.firstName} is a ${data.birthYear ? new Date().getFullYear() - parseInt(data.birthYear) : 'N/A'}-year-old from ${data.hometown || 'an unknown location'}, who values ${data.values.join(', ')}. They are currently ${data.workStatus}${data.jobTitle ? ` as a ${data.jobTitle}` : ''} and living ${data.livingWith}. In relationships, they are ${data.relationshipStatus}. Their life has been shaped by ${data.shapedMost}, and they make decisions ${data.decisionStyle}.`;
+      // Track twin creation and onboarding completion (no auth required)
+      trackEvent(Events.TWIN_CREATED, {
+        has_values: data.values && data.values.length > 0,
+        values_count: data.values?.length || 0,
+      });
+      trackEvent(Events.ONBOARDING_COMPLETED);
 
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-
-      if (userError) {
-        console.error('Auth error:', userError);
-        setIsSaving(false);
-        return;
-      }
-
-      if (!userData?.user) {
-        console.error('No user found');
-        setIsSaving(false);
-        return;
-      }
-
-      // Update profiles table with onboarding data
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: userData.user.id,
-          first_name: data.firstName,
-          hometown: data.hometown,
-          university: data.collegeName,
-          career_entrypoint: data.careerStart,
-          core_json: data, // Store all onboarding data in core_json
-          values_json: data.values,
-          narrative_summary: aiSummary,
-        }, {
-          onConflict: 'user_id'
-        });
-
-      if (profileError) {
-        console.error('Error saving profile:', profileError);
-      } else {
-        // Track twin creation and onboarding completion
-        trackEvent(Events.TWIN_CREATED, {
-          user_id: userData.user.id,
-          has_values: data.values && data.values.length > 0,
-          values_count: data.values?.length || 0,
-        });
-        trackEvent(Events.ONBOARDING_COMPLETED, {
-          user_id: userData.user.id,
-        });
-      }
-
-      // Profile saved - payment page will handle navigation
+      // Onboarding data is already stored in localStorage via OnboardingContext
+      // No need to save to database - proceed directly to simulation
       setIsSaving(false);
     } catch (error) {
       console.error('Error creating digital twin:', error);
@@ -96,10 +57,10 @@ export function ClarifierScreen() {
               onClick={async () => {
                 // Track step completion
                 trackEvent(Events.ONBOARDING_STEP_CLARIFIER);
-                // Save profile data first, then navigate to payment
+                // Create twin (no auth required), then navigate to simulation
                 await handleCreateTwin();
                 if (!isSaving) {
-                  navigate('/payment');
+                  navigate('/simulate-life');
                 }
               }}
               disabled={isSaving}

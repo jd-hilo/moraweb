@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
-import { StatMessage } from '../../components/StatMessage';
 import { trackEvent, Events } from '../../lib/mixpanel';
 
 const decisionOptions = [
@@ -17,7 +16,6 @@ export function DecisionStyleScreen() {
   const navigate = useNavigate();
   const { data, updateData } = useOnboarding();
   const [decisionStyle, setDecisionStyle] = useState(data.decisionStyle);
-  const [showStat, setShowStat] = useState(true);
 
   const handleChange = (value: string) => {
     setDecisionStyle(value);
@@ -35,27 +33,19 @@ export function DecisionStyleScreen() {
   };
 
   return (
-    <>
-      {showStat && (
-        <StatMessage
-          icon="⭐"
-          text="Average 5 stars on the App Store"
-        />
-      )}
-      <OnboardingScreen
-        progress={68}
-        title="How do you usually make big decisions?"
-        onContinue={handleContinue}
-        continueDisabled={!decisionStyle}
-        hideButton={decisionStyle && decisionStyle !== 'other'}
-      >
-        <ChoiceQuestion
-          options={decisionOptions}
-          value={decisionStyle}
-          onChange={handleChange}
-          allowOther
-        />
-      </OnboardingScreen>
-    </>
+    <OnboardingScreen
+      progress={68}
+      title="How do you usually make big decisions?"
+      onContinue={handleContinue}
+      continueDisabled={!decisionStyle}
+      hideButton={decisionStyle && decisionStyle !== 'other'}
+    >
+      <ChoiceQuestion
+        options={decisionOptions}
+        value={decisionStyle}
+        onChange={handleChange}
+        allowOther
+      />
+    </OnboardingScreen>
   );
 }

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { GradientButton } from '../components/GradientButton';
-import { Star, TrendingUp, Shield, Users, Clock, ArrowRight, PlayCircle, X } from 'lucide-react';
+import { Star, TrendingUp, Shield, Users, Clock, ArrowRight, PlayCircle, X, Menu } from 'lucide-react';
 import moraLogo from '../assets/mora.png';
 import moraIcon from '../assets/moraicon.png';
 import { trackEvent, Events } from '../lib/mixpanel';
@@ -57,6 +57,8 @@ export function MarketingLandingPage() {
   const [scrollY, setScrollY] = useState(0);
   const [selectedDemo, setSelectedDemo] = useState<typeof demoSimulations[0] | null>(null);
   const [visibleEvents, setVisibleEvents] = useState<number>(0);
+  const [user, setUser] = useState<any>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const animatedEvents = [
     { year: 2025, event: "Started new remote job", impact: "+$15k Income" },
@@ -88,18 +90,22 @@ export function MarketingLandingPage() {
     return () => clearTimeout(startTimeout);
   }, []);
 
-  // Check if user is signed in and redirect to dashboard
+  // Check auth and listen for changes (login/logout)
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      setUser(currentUser);
+      if (currentUser) {
         navigate('/dashboard');
       } else {
-        // Track landing page view for non-authenticated users
         trackEvent(Events.LANDING_PAGE_VIEWED);
       }
     };
     checkAuth();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   useEffect(() => {
@@ -114,24 +120,35 @@ export function MarketingLandingPage() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrollY > 20 ? 'bg-white/80 backdrop-blur-lg border-b border-gray-100 py-4' : 'bg-transparent py-6'
       }`}>
-        <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={moraLogo} alt="Mora" className="h-8" />
           </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => {
-                trackEvent(Events.GET_STARTED_CLICKED, { source: 'nav' });
-                navigate('/auth');
-              }} 
-              className="text-sm font-medium text-gray-600 hover:text-black transition-colors"
-            >
-              Sign In
-            </button>
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-4">
+            {user ? (
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="text-sm font-medium text-gray-600 hover:text-black transition-colors"
+              >
+                Dashboard
+              </button>
+            ) : (
+              <button 
+                onClick={() => {
+                  trackEvent(Events.GET_STARTED_CLICKED, { source: 'nav' });
+                  navigate('/auth');
+                }} 
+                className="text-sm font-medium text-gray-600 hover:text-black transition-colors"
+              >
+                Sign In
+              </button>
+            )}
             <GradientButton 
               onClick={() => {
                 trackEvent(Events.GET_STARTED_CLICKED, { source: 'nav' });
-                navigate('/welcome');
+                trackEvent(Events.ONBOARDING_STARTED);
+                navigate('/onboarding/name');
               }}
               size="sm"
               variant="purple"
@@ -139,8 +156,72 @@ export function MarketingLandingPage() {
               Get Started
             </GradientButton>
           </div>
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu className="w-6 h-6 text-gray-700" />
+          </button>
         </div>
       </nav>
+
+      {/* Mobile menu overlay */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-50 md:hidden"
+          onClick={() => setMenuOpen(false)}
+        >
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="absolute top-0 right-0 w-full max-w-[280px] h-full bg-white shadow-xl p-6 pt-14 flex flex-col gap-4 animate-slide-in-right"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+            {user ? (
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate('/dashboard');
+                }}
+                className="text-left py-3 font-medium text-gray-700 hover:text-black transition-colors"
+              >
+                Dashboard
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  trackEvent(Events.GET_STARTED_CLICKED, { source: 'mobile_menu' });
+                  navigate('/auth');
+                }}
+                className="text-left py-3 font-medium text-gray-700 hover:text-black transition-colors"
+              >
+                Sign In
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                trackEvent(Events.GET_STARTED_CLICKED, { source: 'mobile_menu' });
+                trackEvent(Events.ONBOARDING_STARTED);
+                navigate('/onboarding/name');
+              }}
+              className="w-full py-3 rounded-xl font-bold text-white text-center"
+              style={{ background: 'linear-gradient(135deg, #9333EA, #6366F1)' }}
+            >
+              Get Started
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6 relative overflow-hidden">
@@ -220,7 +301,8 @@ export function MarketingLandingPage() {
             <GradientButton 
               onClick={() => {
                 trackEvent(Events.GET_STARTED_CLICKED, { source: 'hero' });
-                navigate('/welcome');
+                trackEvent(Events.ONBOARDING_STARTED);
+                navigate('/onboarding/name');
               }}
               size="lg"
               variant="purple"
@@ -463,7 +545,8 @@ export function MarketingLandingPage() {
           <GradientButton 
             onClick={() => {
               trackEvent(Events.GET_STARTED_CLICKED, { source: 'cta' });
-              navigate('/welcome');
+              trackEvent(Events.ONBOARDING_STARTED);
+              navigate('/onboarding/name');
             }}
             size="lg"
             variant="turquoise"
@@ -537,7 +620,8 @@ export function MarketingLandingPage() {
                    <GradientButton 
                     onClick={() => {
                       trackEvent(Events.GET_STARTED_CLICKED, { source: 'demo_modal' });
-                      navigate('/welcome');
+                      trackEvent(Events.ONBOARDING_STARTED);
+                      navigate('/onboarding/name');
                     }}
                     className="w-full"
                     variant="purple"

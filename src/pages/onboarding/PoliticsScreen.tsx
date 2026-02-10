@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { ChoiceQuestion } from '../../components/ChoiceQuestion';
 import { useOnboarding } from '../../context/OnboardingContext';
-import { StatMessage } from '../../components/StatMessage';
 import { trackEvent, Events } from '../../lib/mixpanel';
 
 const politicsOptions = [
@@ -19,7 +18,6 @@ export function PoliticsScreen() {
   const navigate = useNavigate();
   const { data, updateData } = useOnboarding();
   const [politics, setPolitics] = useState(data.politics);
-  const [showStat, setShowStat] = useState(true);
 
   const handleChange = (value: string) => {
     setPolitics(value);
@@ -37,27 +35,19 @@ export function PoliticsScreen() {
   };
 
   return (
-    <>
-      {showStat && (
-        <StatMessage
-          icon="🔬"
-          text="Powered by Proprietary Simulation Technology"
-        />
-      )}
-      <OnboardingScreen
-        progress={76}
-        title="What are your political views?"
-        onContinue={handleContinue}
-        continueDisabled={!politics}
-        hideButton={politics && politics !== 'other'}
-      >
-        <ChoiceQuestion
-          options={politicsOptions}
-          value={politics}
-          onChange={handleChange}
-          allowOther
-        />
-      </OnboardingScreen>
-    </>
+    <OnboardingScreen
+      progress={76}
+      title="What are your political views?"
+      onContinue={handleContinue}
+      continueDisabled={!politics}
+      hideButton={politics && politics !== 'other'}
+    >
+      <ChoiceQuestion
+        options={politicsOptions}
+        value={politics}
+        onChange={handleChange}
+        allowOther
+      />
+    </OnboardingScreen>
   );
 }

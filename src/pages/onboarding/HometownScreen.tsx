@@ -24,6 +24,7 @@ export function HometownScreen() {
     >
       <input
         type="text"
+        enterKeyHint="done"
         value={hometown}
         onChange={(e) => setHometown(e.target.value)}
         placeholder="City, State/Country (e.g., Austin, TX or London, UK)"

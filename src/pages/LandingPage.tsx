@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
 import { TypewriterText } from '../components/TypewriterText';
 import { GradientButton } from '../components/GradientButton';
 import { ProgressBar } from '../components/ProgressBar';
@@ -12,27 +11,7 @@ export function LandingPage() {
   const [showButton, setShowButton] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user is signed in and has completed onboarding - only then redirect to dashboard
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Check if user has completed onboarding
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('core_json')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        // Only redirect to dashboard if onboarding is complete
-        if (profile && profile.core_json) {
-          navigate('/dashboard');
-        }
-        // Otherwise, stay on welcome page for onboarding
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+  // Removed auth check - users can now create simulations without an account
 
   const messages = [
     "let's build your digital twin",
@@ -109,7 +88,7 @@ export function LandingPage() {
             <div className="flex justify-center pt-2">
               <GradientButton onClick={() => {
                 trackEvent(Events.ONBOARDING_STARTED);
-                navigate('/auth');
+                navigate('/onboarding/name');
               }}>
                 Begin
               </GradientButton>

@@ -30,10 +30,33 @@ export function SimulationResultsPage() {
 
   useEffect(() => {
     const fetchSimulation = async () => {
+      // Check if simulation data was passed directly (for anonymous users)
+      const { simulationData: directData } = location.state || {};
+      
+      if (directData && !simulationId) {
+        // Use data passed directly from SimulateLifePage (anonymous user)
+        console.log('Using simulation data passed directly');
+        setSimulationData({
+          id: 'anonymous-' + Date.now(),
+          scenarios: directData,
+          summary: 'Life simulation based on digital twin',
+          user_id: null,
+        });
+        setIsLoading(false);
+        setIsPageLoaded(true);
+        
+        trackEvent(Events.SIMULATION_VIEWED, {
+          simulation_id: null,
+          user_id: null,
+          is_shared_link: false,
+        });
+        return;
+      }
+
       if (!simulationId) {
-        // If no simulationId in URL or state, redirect to home
+        // If no simulationId in URL or state, redirect to dashboard
         if (!querySimulationId && !stateSimulationId) {
-          navigate('/');
+          navigate('/dashboard');
         }
         return;
       }
@@ -83,7 +106,7 @@ export function SimulationResultsPage() {
     };
 
     fetchSimulation();
-  }, [simulationId, navigate, querySimulationId, stateSimulationId]);
+  }, [simulationId, navigate, querySimulationId, stateSimulationId, location.state]);
 
   // Check if current user is the owner
   useEffect(() => {
@@ -193,7 +216,7 @@ export function SimulationResultsPage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-xl text-gray-600">Simulation not found</p>
-          <GradientButton onClick={() => navigate('/')}>
+          <GradientButton onClick={() => navigate('/dashboard')}>
             Go Home
           </GradientButton>
         </div>
@@ -440,7 +463,7 @@ export function SimulationResultsPage() {
                 Share Simulation
               </GradientButton>
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/dashboard')}
                 className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
               >
                 Return Home

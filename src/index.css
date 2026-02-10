@@ -50,6 +50,14 @@
   .animate-scroll {
     animation: scroll 20s linear infinite;
   }
+
+  @keyframes slide-in-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  .animate-slide-in-right {
+    animation: slide-in-right 0.25s ease-out;
+  }
   
   .pause-on-hover:hover {
     animation-play-state: paused;
@@ -67,6 +75,18 @@
     background: linear-gradient(135deg, #E87A7F, #E4B5D3, #E4B8A6);
   }
 
+  .gradient-career {
+    background: linear-gradient(135deg, #25729f, #62edb9);
+  }
+
+  /* Safe area for notched mobile devices */
+  .pt-safe {
+    padding-top: max(2.75rem, env(safe-area-inset-top, 0px));
+  }
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  }
+
   .overlay-gradient {
     background:
       radial-gradient(circle at 20% 50%, rgba(232, 122, 127, 0.15), transparent 50%),
@@ -75,3 +95,5 @@
       #ffffff;
   }
 }
+
+

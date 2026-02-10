@@ -55,6 +55,7 @@ export function WorkStatusScreen() {
           <div className="space-y-4 animate-slide-up">
             <input
               type="text"
+              enterKeyHint="done"
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
               placeholder="What is your current job?"

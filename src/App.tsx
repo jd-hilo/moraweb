@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { OnboardingProvider } from './context/OnboardingContext';
 
-import { LandingPage } from './pages/LandingPage';
 import { MarketingLandingPage } from './pages/MarketingLandingPage';
 import { AuthScreen } from './pages/AuthScreen';
 import { NameScreen } from './pages/onboarding/NameScreen';
+import { SimulationTypeScreen } from './pages/onboarding/SimulationTypeScreen';
 import { BirthYearScreen } from './pages/onboarding/BirthYearScreen';
 import { ValuesScreen } from './pages/onboarding/ValuesScreen';
 import { WorkStatusScreen } from './pages/onboarding/WorkStatusScreen';
@@ -34,18 +34,34 @@ import { SimulationResultsPage } from './pages/SimulationResultsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { InvestorsPage } from './pages/InvestorsPage';
 
+import { CareerLandingPage } from './pages/CareerLandingPage';
+
+// Career simulation imports
+import { StudentCheckScreen } from './pages/career/StudentCheckScreen';
+import { StudentDetailsScreen } from './pages/career/StudentDetailsScreen';
+import { RoleScreen } from './pages/career/RoleScreen';
+import { SalaryScreen } from './pages/career/SalaryScreen';
+import { HorizonScreen } from './pages/career/HorizonScreen';
+import { CareerGoalsScreen } from './pages/career/CareerGoalsScreen';
+import { WorkStyleScreen } from './pages/career/WorkStyleScreen';
+import { RiskScreen } from './pages/career/RiskScreen';
+import { EmailScreen } from './pages/career/EmailScreen';
+import { CareerPaywallScreen } from './pages/career/CareerPaywallScreen';
+import { CareerGeneratingPage } from './pages/career/CareerGeneratingPage';
+import { CareerResultsPage } from './pages/career/CareerResultsPage';
+
 function App() {
   return (
     <BrowserRouter>
       <OnboardingProvider>
         <Routes>
           <Route path="/" element={<MarketingLandingPage />} />
-          <Route path="/welcome" element={<LandingPage />} />
           <Route path="/investors" element={<InvestorsPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/auth" element={<AuthScreen />} />
 
           <Route path="/onboarding/name" element={<NameScreen />} />
+          <Route path="/onboarding/simulation-type" element={<SimulationTypeScreen />} />
           <Route path="/onboarding/birth-year" element={<BirthYearScreen />} />
           <Route path="/onboarding/values" element={<ValuesScreen />} />
           <Route path="/onboarding/work-status" element={<WorkStatusScreen />} />
@@ -73,6 +89,21 @@ function App() {
           <Route path="/simulate-life" element={<SimulateLifePage />} />
           <Route path="/decide-for-me" element={<DecideForMePage />} />
           <Route path="/simulation-results" element={<SimulationResultsPage />} />
+
+          {/* Career simulation routes */}
+          <Route path="/career" element={<CareerLandingPage />} />
+          <Route path="/career/student-check" element={<StudentCheckScreen />} />
+          <Route path="/career/student-details" element={<StudentDetailsScreen />} />
+          <Route path="/career/role" element={<RoleScreen />} />
+          <Route path="/career/salary" element={<SalaryScreen />} />
+          <Route path="/career/horizon" element={<HorizonScreen />} />
+          <Route path="/career/goals" element={<CareerGoalsScreen />} />
+          <Route path="/career/work-style" element={<WorkStyleScreen />} />
+          <Route path="/career/risk" element={<RiskScreen />} />
+          <Route path="/career/email" element={<EmailScreen />} />
+          <Route path="/career/paywall" element={<CareerPaywallScreen />} />
+          <Route path="/career/generating" element={<CareerGeneratingPage />} />
+          <Route path="/career/results" element={<CareerResultsPage />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

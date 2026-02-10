@@ -2,22 +2,30 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { GradientButton } from '../components/GradientButton';
+import { useCareerPro } from '../hooks/useCareerPro';
 import { Sparkles, Clock, Share2, LogOut } from 'lucide-react';
 import moraIcon from '../assets/moraicon.png';
 import { trackEvent, resetUser, Events } from '../lib/mixpanel';
+
+const BILLING_PORTAL_URL =
+  import.meta.env.VITE_STRIPE_BILLING_PORTAL_URL ||
+  'https://billing.stripe.com/p/login/dRm14n9bBaOv9yn5AfbjW00';
 
 interface WebSim {
   id: string;
   scenarios: any;
   summary: string;
+  simulation_type?: 'life' | 'career';
   created_at: string;
 }
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const { hasAccess: isPremium } = useCareerPro();
   const [simulations, setSimulations] = useState<WebSim[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -33,21 +41,30 @@ export function DashboardPage() {
         setUser(currentUser);
 
         // Fetch user's simulations
+        let careerSims: WebSim[] = [];
         const { data, error } = await supabase
           .from('websims')
-          .select('*')
+          .select('id, scenarios, summary, created_at')
           .eq('user_id', currentUser.id)
           .order('created_at', { ascending: false })
-          .limit(10);
+          .limit(20);
+
+        if (!error && data) {
+          careerSims = data.filter(
+            (s) => (s as WebSim).simulation_type === 'career' ||
+              s.scenarios?.outcome != null ||
+              s.scenarios?.timeHorizon != null
+          );
+        }
 
         if (error) {
           console.error('Error fetching simulations:', error);
         } else {
-          setSimulations(data || []);
+          setSimulations(careerSims);
           // Track dashboard viewed
           trackEvent(Events.DASHBOARD_VIEWED, {
             user_id: currentUser.id,
-            simulation_count: (data || []).length,
+            simulation_count: careerSims.length,
           });
         }
       } catch (error) {
@@ -60,8 +77,9 @@ export function DashboardPage() {
     loadDashboard();
   }, [navigate]);
 
-  const handleShare = async (simulationId: string) => {
-    const shareUrl = `${window.location.origin}/simulation-results?simulationId=${simulationId}`;
+  const handleShare = async (simulationId: string, isCareer?: boolean) => {
+    const path = isCareer ? '/career/results' : '/simulation-results';
+    const shareUrl = `${window.location.origin}${path}?simulationId=${simulationId}`;
     const shareMessage = `Check out my life simulation - presented by mora.\n\n${shareUrl}`;
     try {
       await navigator.clipboard.writeText(shareMessage);
@@ -75,6 +93,12 @@ export function DashboardPage() {
     } catch (err) {
       console.error('Failed to copy:', err);
     }
+  };
+
+  const handleBillingPortal = () => {
+    setPortalLoading(true);
+    window.open(BILLING_PORTAL_URL, '_blank');
+    setTimeout(() => setPortalLoading(false), 500);
   };
 
   const handleSignOut = async () => {
@@ -148,64 +172,70 @@ export function DashboardPage() {
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-black mb-2">No simulations yet</h2>
-              <p className="text-gray-600 mb-6">Create your first life simulation to get started</p>
+              <h2 className="text-2xl font-bold text-black mb-2">No career simulations yet</h2>
+              <p className="text-gray-600 mb-6">Run your first career simulation to see your projection</p>
               <GradientButton
-                onClick={() => navigate('/simulate-life')}
+                onClick={() => navigate('/career/student-check')}
                 variant="purple"
               >
-                Create Your First Simulation
+                Start Career Simulation
               </GradientButton>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-black">Recent Simulations</h2>
+            <h2 className="text-xl font-bold text-black">Your Career Simulations</h2>
             <div className="grid gap-4">
-              {simulations.map((sim) => (
-                <div
-                  key={sim.id}
-                  className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-                  onClick={() => navigate('/simulation-results', { 
-                    state: { simulationId: sim.id } 
-                  })}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-500">
-                          {formatDate(sim.created_at)}
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold text-black mb-1">
-                        Life Simulation
-                      </h3>
-                      {sim.summary && (
+              {simulations.map((sim) => {
+                const outcomeTitle = sim.scenarios?.outcome?.title;
+                return (
+                  <div
+                    key={sim.id}
+                    className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+                    onClick={() =>
+                      navigate('/career/results', {
+                        state: {
+                          careerSimulation: sim.scenarios,
+                          simulationId: sim.id,
+                        },
+                      })
+                    }
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="text-sm text-gray-500">
+                            {formatDate(sim.created_at)}
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-bold text-black mb-1">
+                          Career Simulation
+                        </h3>
                         <p className="text-sm text-gray-600 line-clamp-2">
-                          {sim.summary}
+                          {outcomeTitle || sim.summary || 'Your career projection'}
                         </p>
-                      )}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShare(sim.id, true);
+                        }}
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors ml-4 flex-shrink-0"
+                        title="Share simulation"
+                      >
+                        <Share2 className="w-4 h-4 text-gray-600" />
+                      </button>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleShare(sim.id);
-                      }}
-                      className="p-2 rounded-full hover:bg-gray-100 transition-colors ml-4"
-                      title="Share simulation"
-                    >
-                      <Share2 className="w-4 h-4 text-gray-600" />
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* Footer with Terms of Service and Contact */}
-        <div className="pt-12 pb-6 flex items-center gap-4">
+        <div className="pt-12 pb-6 flex flex-wrap items-center gap-4">
           <a
             href="https://pastoral-supply-662.notion.site/Terms-of-Service-Mora-2d72cec59ddf80099945c84fe81add84?source=copy_link"
             target="_blank"
@@ -221,6 +251,18 @@ export function DashboardPage() {
           >
             Contact Us
           </a>
+          {isPremium && (
+            <>
+              <span className="text-gray-300">•</span>
+              <button
+                onClick={handleBillingPortal}
+                disabled={portalLoading}
+                className="text-sm text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-60"
+              >
+                {portalLoading ? 'Opening...' : 'Cancel subscription'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

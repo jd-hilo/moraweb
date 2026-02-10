@@ -12,6 +12,7 @@ export async function generateSimulationWithClaude(userData: any): Promise<Timel
   // Build user context from onboarding data
   const userContext = {
     firstName: userData.firstName || 'User',
+    simulationType: userData.simulationType || 'career', // Default to career if not specified
     birthYear: userData.birthYear,
     age: userData.birthYear ? new Date().getFullYear() - parseInt(userData.birthYear) : 30,
     hometown: userData.hometown,
@@ -36,6 +37,14 @@ export async function generateSimulationWithClaude(userData: any): Promise<Timel
     politics: userData.politics,
   };
 
+  const simulationTypeFocus = {
+    career: 'Focus primarily on professional development, career transitions, job changes, promotions, skill development, industry shifts, and work-related achievements. Include some personal context but prioritize career trajectory.',
+    relationship: 'Focus primarily on romantic relationships, dating, partnerships, relationship milestones, breakups, new connections, and relationship dynamics. Include some career/personal context but prioritize relationship evolution.',
+    social: 'Focus primarily on friendships, social circles, community involvement, networking, social events, group activities, and how social connections evolve. Include some career/relationship context but prioritize social life development.',
+  };
+
+  const focusInstruction = simulationTypeFocus[userContext.simulationType as keyof typeof simulationTypeFocus] || simulationTypeFocus.career;
+
   const systemPrompt = `You are a life trajectory simulator. Generate HYPER-SPECIFIC, concrete events with real details.
   
   CRITICAL: Write ALL events in SECOND PERSON (you/your). The user is living this timeline. Make each event vivid, tangible, and exciting to read - like reading a compelling biography of their future self.
@@ -44,17 +53,21 @@ export async function generateSimulationWithClaude(userData: any): Promise<Timel
 
   const userPrompt = `User Context: ${JSON.stringify(userContext, null, 2)}
 
+SIMULATION TYPE: ${userContext.simulationType || 'career'}
+FOCUS AREA: ${focusInstruction}
+
 Generate a timeline of 5 HYPER-SPECIFIC, exciting events for each horizon (1 year, 3 years, 5 years, 10 years) that show how their life naturally unfolds based on their current trajectory, values, and aspirations.
 
 CRITICAL REQUIREMENTS:
-1. LIFE TRAJECTORY: Events should reflect natural progression based on their current situation, values, goals, and personality
-2. AUTHENTICITY: Incorporate relevant facts from the User Context (their job, location, relationships, values, interests, life stage)
-3. CAUSAL CHAIN: Show how small actions and natural progression create meaningful life changes over time
-4. BALANCE: Mix career growth, personal development, relationships, financial milestones, adventures, and meaningful moments
-5. EXCITEMENT: Make each event feel significant and engaging - like turning points, achievements, discoveries, or transformative moments
-6. PROBABILITY: Assign a realistic probability (0-100%) to each event based on the user's profile and the event's likelihood.
-7. VARIETY: Do NOT make every event about money or career. Include personal growth, relationships, unexpected turns, and simple joys.
-8. ACCURATE YET SURPRISING: Events should feel like they *could* happen to this person, but reveal a path they might not have expected.
+1. SIMULATION TYPE FOCUS: ${focusInstruction}
+2. LIFE TRAJECTORY: Events should reflect natural progression based on their current situation, values, goals, and personality
+3. AUTHENTICITY: Incorporate relevant facts from the User Context (their job, location, relationships, values, interests, life stage)
+4. CAUSAL CHAIN: Show how small actions and natural progression create meaningful life changes over time
+5. BALANCE: While focusing on ${userContext.simulationType || 'career'}, include relevant context from other life areas
+6. EXCITEMENT: Make each event feel significant and engaging - like turning points, achievements, discoveries, or transformative moments
+7. PROBABILITY: Assign a realistic probability (0-100%) to each event based on the user's profile and the event's likelihood.
+8. VARIETY: Include diverse events within the ${userContext.simulationType || 'career'} focus area - different aspects, unexpected turns, and meaningful moments
+9. ACCURATE YET SURPRISING: Events should feel like they *could* happen to this person, but reveal a path they might not have expected.
 
 Be HYPER-SPECIFIC with concrete details:
 - Exact numbers ($X saved, X% growth, X hours per week, X people, X miles traveled) - use sparingly for impact

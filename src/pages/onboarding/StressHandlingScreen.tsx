@@ -22,6 +22,7 @@ export function StressHandlingScreen() {
       onContinue={handleContinue}
     >
       <textarea
+        enterKeyHint="done"
         value={stressHandling}
         onChange={(e) => setStressHandling(e.target.value)}
         placeholder="Tell us how you handle stress... (optional)"

@@ -62,6 +62,7 @@ export const Events = {
   
   // Onboarding step events - web
   ONBOARDING_STEP_NAME: 'Onboarding Step Completed - Name - web',
+  ONBOARDING_STEP_SIMULATION_TYPE: 'Onboarding Step Completed - Simulation Type - web',
   ONBOARDING_STEP_BIRTH_YEAR: 'Onboarding Step Completed - Birth Year - web',
   ONBOARDING_STEP_VALUES: 'Onboarding Step Completed - Values - web',
   ONBOARDING_STEP_WORK_STATUS: 'Onboarding Step Completed - Work Status - web',
@@ -95,6 +96,21 @@ export const Events = {
   // Landing page events
   LANDING_PAGE_VIEWED: 'Landing Page Viewed',
   GET_STARTED_CLICKED: 'Get Started Clicked',
+
+  // Career events
+  CAREER_LANDING_VIEWED: 'Web - Career - Landing',
+  CAREER_STUDENT_CHECK: 'Web - Career - Student Check',
+  CAREER_STUDENT_DETAILS: 'Web - Career - Student Details',
+  CAREER_ROLE: 'Web - Career - Role',
+  CAREER_SALARY: 'Web - Career - Salary',
+  CAREER_HORIZON: 'Web - Career - Horizon',
+  CAREER_GOALS: 'Web - Career - Goals',
+  CAREER_WORK_STYLE: 'Web - Career - Work Style',
+  CAREER_RISK: 'Web - Career - Risk',
+  CAREER_EMAIL: 'Web - Career - Email',
+  CAREER_PAYWALL: 'Web - Career - Paywall',
+  CAREER_GENERATING: 'Web - Career - Generating',
+  CAREER_RESULTS: 'Web - Career - Results',
   
   // Share events
   SHARE_MODAL_SHOWN: 'Share Modal Shown',

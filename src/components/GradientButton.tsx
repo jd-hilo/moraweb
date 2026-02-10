@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes } from 'react';
 
 interface GradientButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  variant?: 'turquoise' | 'purple' | 'peach';
+  variant?: 'turquoise' | 'purple' | 'peach' | 'career';
   size?: 'sm' | 'md' | 'lg';
 }
 

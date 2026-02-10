@@ -53,6 +53,34 @@ Use Stripe test cards:
 ClarifierScreen → PaymentPage → Stripe Checkout → Success → SimulateLifePage
 ```
 
+## Career Simulation Pro ($1 trial → $29/mo)
+
+**Flow:** Career onboarding → Email screen → Paywall → Stripe Checkout → Generating → Results
+
+### Testing (no real money)
+
+With `sk_test_` keys, Stripe uses **test mode** — no real charges:
+
+1. Run `npm run dev:all` (or `npm run server` + `npm run dev` in separate terminals)
+2. Go to `/career` and complete the 8 onboarding screens
+3. Enter any email on the email screen
+4. On paywall, click "Start my 7-day trial for $1"
+5. Use test card: **4242 4242 4242 4242**
+   - Expiry: any future date (e.g. 12/34)
+   - CVC: any 3 digits (e.g. 123)
+   - Name: anything
+6. After checkout → generating → results. You can click alternate paths (Pro access for this session)
+
+### Optional: Webhook for subscription sync
+
+For subscription status sync (trial end, cancel, etc.):
+
+```bash
+# Get webhook secret for local testing
+stripe listen --forward-to localhost:3001/api/stripe/webhook
+# Add STRIPE_WEBHOOK_SECRET=whsec_... to .env
+```
+
 ## Features
 
 - ✅ High-converting payment page design
@@ -61,6 +89,7 @@ ClarifierScreen → PaymentPage → Stripe Checkout → Success → SimulateLife
 - ✅ Payment success tracking in Mixpanel
 - ✅ Prevents duplicate payments (checks is_premium)
 - ✅ Mobile-responsive design
+
 
 
 
