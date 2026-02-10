@@ -4,6 +4,7 @@ import { useOnboarding } from '../../context/OnboardingContext';
 import { generateCareerSimulation } from '../../lib/careerSimulation';
 import { supabase } from '../../lib/supabase';
 import { trackEvent, Events } from '../../lib/mixpanel';
+import { trackReddit } from '../../lib/reddit';
 import { setCareerProVerified } from '../../hooks/useCareerPro';
 
 const API_BASE_URL =
@@ -53,6 +54,11 @@ export function CareerGeneratingPage() {
           });
           const data = await res.json();
           if (data.success && !cancelled) {
+            trackReddit('Purchase', {
+              value: 29,
+              currency: 'USD',
+              conversion_id: 'career_pro',
+            });
             setCareerProVerified();
             setHasAccess(true);
             setAccessChecked(true);

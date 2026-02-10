@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { CheckCircle } from 'lucide-react';
 import { trackEvent, Events } from '../lib/mixpanel';
+import { trackReddit } from '../lib/reddit';
 
 // Use relative path in production (Vercel serverless), localhost in dev
 const API_BASE_URL = import.meta.env.VITE_PROXY_URL || 
@@ -78,6 +79,9 @@ export function PaymentSuccessPage() {
             currency: 'USD',
             session_id: sessionId,
           });
+
+          // Track conversion for Reddit ads
+          trackReddit('Purchase', { value: 4.99, currency: 'USD' });
 
           setIsVerified(true);
           

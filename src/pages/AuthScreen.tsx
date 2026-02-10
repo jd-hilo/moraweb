@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ChevronRight, ArrowLeft, Star, Mail } from 'lucide-react';
 import { trackEvent, identifyUser, Events } from '../lib/mixpanel';
+import { identifyReddit } from '../lib/reddit';
 
 export function AuthScreen() {
   const navigate = useNavigate();
@@ -126,6 +127,7 @@ export function AuthScreen() {
 
       if (data.user) {
         identifyUser(data.user.id, { email: data.user.email });
+        identifyReddit({ email: data.user.email ?? undefined, externalId: data.user.id });
 
         const userCreatedAt = new Date(data.user.created_at);
         const now = new Date();

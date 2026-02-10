@@ -6,6 +6,7 @@ import { useCareerPro } from '../hooks/useCareerPro';
 import { Sparkles, Clock, Share2, LogOut } from 'lucide-react';
 import moraIcon from '../assets/moraicon.png';
 import { trackEvent, resetUser, Events } from '../lib/mixpanel';
+import { identifyReddit } from '../lib/reddit';
 
 const BILLING_PORTAL_URL =
   import.meta.env.VITE_STRIPE_BILLING_PORTAL_URL ||
@@ -39,6 +40,10 @@ export function DashboardPage() {
         }
 
         setUser(currentUser);
+        identifyReddit({
+          email: currentUser.email ?? undefined,
+          externalId: currentUser.id,
+        });
 
         // Fetch user's simulations
         let careerSims: WebSim[] = [];
