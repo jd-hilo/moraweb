@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { useOnboarding } from '../../context/OnboardingContext';
 import { setCareerProVerified } from '../../hooks/useCareerPro';
+import { supabase } from '../../lib/supabase';
 import { Mail } from 'lucide-react';
 import { trackEvent, Events } from '../../lib/mixpanel';
 
@@ -24,6 +25,18 @@ export function EmailScreen() {
   useEffect(() => {
     trackEvent(Events.CAREER_EMAIL);
   }, []);
+
+  // Prefill email if user is signed in
+  useEffect(() => {
+    const loadUserEmail = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setEmail(user.email);
+        updateData({ email: user.email.toLowerCase() });
+      }
+    };
+    loadUserEmail();
+  }, [updateData]);
 
   const handleContinue = async () => {
     const trimmed = email.trim().toLowerCase();
@@ -57,7 +70,7 @@ export function EmailScreen() {
     } finally {
       setIsChecking(false);
     }
-    navigate('/career/paywall');
+    navigate('/career/generating');
   };
 
   return (

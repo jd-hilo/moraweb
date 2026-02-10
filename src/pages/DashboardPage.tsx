@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { GradientButton } from '../components/GradientButton';
 import { useCareerPro } from '../hooks/useCareerPro';
-import { Sparkles, Clock, Share2, LogOut } from 'lucide-react';
+import { Sparkles, Clock, Share2, LogOut, GitBranch } from 'lucide-react';
 import moraIcon from '../assets/moraicon.png';
 import { trackEvent, resetUser, Events } from '../lib/mixpanel';
 import { identifyReddit } from '../lib/reddit';
@@ -193,6 +193,7 @@ export function DashboardPage() {
             <div className="grid gap-4">
               {simulations.map((sim) => {
                 const outcomeTitle = sim.scenarios?.outcome?.title;
+                const hasBranches = (sim.scenarios?.alternatePaths?.length ?? 0) > 0;
                 return (
                   <div
                     key={sim.id}
@@ -220,6 +221,24 @@ export function DashboardPage() {
                         <p className="text-sm text-gray-600 line-clamp-2">
                           {outcomeTitle || sim.summary || 'Your career projection'}
                         </p>
+                        {hasBranches && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate('/career/results', {
+                                state: {
+                                  careerSimulation: sim.scenarios,
+                                  simulationId: sim.id,
+                                  scrollToBranches: true,
+                                },
+                              });
+                            }}
+                            className="mt-3 flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 font-medium"
+                          >
+                            <GitBranch className="w-4 h-4" />
+                            Branches
+                          </button>
+                        )}
                       </div>
                       <button
                         onClick={(e) => {

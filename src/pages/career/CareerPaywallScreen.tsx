@@ -1,140 +1,141 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { CareerSimulation } from '../../types/career';
 import {
-  Check,
-  Shield,
-  ArrowRight,
-  ChevronDown,
+  Lock,
   Building2,
   MapPin,
-  Star,
+  CreditCard,
+  ChevronDown,
+  Shield,
+  Check,
+  Smartphone,
+  Mail,
+  MessageSquare,
+  GitBranch,
+  Clock,
+  Globe,
   Zap,
   Users,
-  Heart,
-  Gift,
-  CreditCard,
+  TrendingUp,
 } from 'lucide-react';
 import { trackEvent, Events } from '../../lib/mixpanel';
+import { trackReddit } from '../../lib/reddit';
 import { useCareerPro, setCareerProVerified } from '../../hooks/useCareerPro';
 import moraLogo from '../../assets/mora.png';
 
-// Same-origin uses Vite proxy in dev (-> localhost:3001) and Vercel serverless in prod
-// Only use explicit URL when pointing to a different backend (e.g. deployed API)
 const API_BASE_URL =
   import.meta.env.VITE_PROXY_URL &&
   !import.meta.env.VITE_PROXY_URL.includes('localhost:3001')
     ? import.meta.env.VITE_PROXY_URL
     : '';
 
-const COUNTDOWN_KEY = 'careerPaywallCountdownEnd';
-const COUNTDOWN_MINUTES = 15;
-
-/* ── FAQ ── */
+/* ── Minimal FAQ ── */
 const FAQ_ITEMS = [
   {
-    q: 'How is this different from a generic career quiz?',
-    a: "Traditional career quizzes give you a personality type and generic job titles. Mora builds a full simulation — year-by-year timelines, specific salary figures, daily life snapshots, performance reviews, and the exact decision points that will shape your career. Our model is informed by real HR frameworks used by Fortune 500 companies, including talent management, succession planning, and performance management methodology.",
+    q: 'What do I get?',
+    a: 'Your full career simulation including a year-by-year timeline with salary progression, daily life snapshots, team feedback, the email that changes your career, regret moments, global comparisons, and alternate career paths you can explore.',
   },
   {
-    q: 'How accurate are the projections?',
-    a: "Our career modeling draws on real industry compensation data, organizational behavior research, and leadership assessment frameworks used by executive coaches. Users report 85%+ accuracy on salary ranges and career trajectory timing. Results are probabilistic projections, not guarantees — but they're far more nuanced than anything else available.",
+    q: 'How does billing work?',
+    a: "You pay $1 today for a 7-day trial. After the trial, it's $29/month for continued access to Mora+ features including unlimited re-simulations and alternate path exploration. You can cancel anytime.",
   },
   {
-    q: 'What does my simulation include?',
-    a: 'Your full simulation includes: a year-by-year career timeline with milestones, detailed salary progression, daily life snapshots, team and manager dynamics, performance review predictions, the emails and conversations that change your trajectory, key regret moments, and the ability to explore alternate paths from any decision point.',
-  },
-  {
-    q: 'How soon will I see my results?',
-    a: 'Instantly. Your personalized career simulation generates in under 60 seconds after payment. No waiting, no scheduling calls.',
-  },
-  {
-    q: 'What happens after the trial?',
-    a: "After your 7-day trial, you'll be billed $29/month for continued Mora+ access. This gives you unlimited re-simulations, alternate path exploration, and access to all saved projections. You can cancel anytime.",
-  },
-  {
-    q: 'How do I cancel my subscription?',
-    a: "Cancel anytime with one click through the Stripe billing portal — no phone calls, no retention tricks, no questions asked. You'll find the link in your email receipt or account settings. Your access continues through the end of your billing period.",
+    q: 'How do I cancel?',
+    a: "Cancel anytime with one click through the Stripe billing portal — no phone calls, no retention tricks, no questions asked. You'll find the link in your email receipt.",
   },
 ];
 
-/* ── Countdown helpers ── */
-function getCountdownEnd(): number {
-  const stored = sessionStorage.getItem(COUNTDOWN_KEY);
+/* ── Expiry helpers ── */
+const EXPIRY_KEY = 'careerPaywallExpiryEnd';
+const EXPIRY_HOURS = 24;
+
+function getExpiryEnd(): number {
+  const stored = localStorage.getItem(EXPIRY_KEY);
   if (stored) return parseInt(stored, 10);
-  const end = Date.now() + COUNTDOWN_MINUTES * 60 * 1000;
-  sessionStorage.setItem(COUNTDOWN_KEY, String(end));
+  const end = Date.now() + EXPIRY_HOURS * 60 * 60 * 1000;
+  localStorage.setItem(EXPIRY_KEY, String(end));
   return end;
 }
 
-function formatCountdown(ms: number): string {
-  if (ms <= 0) return '0:00';
-  const m = Math.floor(ms / 60000);
-  const s = Math.floor((ms % 60000) / 1000);
-  return `${m}:${s.toString().padStart(2, '0')}`;
+function formatExpiry(ms: number): string {
+  if (ms <= 0) return 'Expired';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
 }
 
 /* ── Component ── */
 export function CareerPaywallScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { data } = useOnboarding();
   const { hasAccess } = useCareerPro();
+
   const [isLoading, setIsLoading] = useState(false);
-  const [accessChecked, setAccessChecked] = useState(false);
   const [error, setError] = useState('');
-  const [countdownMs, setCountdownMs] = useState(() =>
-    Math.max(0, getCountdownEnd() - Date.now()),
-  );
+  const [simulation, setSimulation] = useState<CareerSimulation | null>(null);
+  const [simulationId, setSimulationId] = useState<string | null>(null);
+  const [expiryMs, setExpiryMs] = useState(() => Math.max(0, getExpiryEnd() - Date.now()));
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const [compRevealed, setCompRevealed] = useState(false);
-  const pricingRef = useRef<HTMLDivElement>(null);
 
   const email = data.email?.trim();
 
+  // Load simulation from navigation state or localStorage
+  useEffect(() => {
+    const stateData = location.state as {
+      simulation?: CareerSimulation;
+      simulationId?: string;
+    } | null;
+
+    if (stateData?.simulation) {
+      setSimulation(stateData.simulation);
+      if (stateData.simulationId) setSimulationId(stateData.simulationId);
+      return;
+    }
+
+    // Fallback: localStorage (e.g., user returned from Stripe cancel)
+    const stored = localStorage.getItem('pendingCareerSimulation');
+    const storedId = localStorage.getItem('pendingCareerSimulationId');
+    if (stored) {
+      try {
+        setSimulation(JSON.parse(stored));
+        if (storedId) setSimulationId(storedId);
+      } catch {
+        // corrupt data
+      }
+      return;
+    }
+
+    // No simulation data — can't show paywall
+    navigate('/career/email', { replace: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Track page view
   useEffect(() => {
     trackEvent(Events.CAREER_PAYWALL);
-    const t = setTimeout(() => setCompRevealed(true), 1200);
-    return () => clearTimeout(t);
   }, []);
 
+  // Redirect if already premium
+  useEffect(() => {
+    if (!email) return;
+    if (hasAccess === true) {
+      setCareerProVerified();
+      navigate('/career/generating', { replace: true });
+    }
+  }, [hasAccess, email, navigate]);
+
+  // Redirect if no email
   useEffect(() => {
     if (!email) navigate('/career/email', { replace: true });
   }, [email, navigate]);
 
-  // Bypass paywall for premium users (session storage, profile, or Stripe subscription)
-  useEffect(() => {
-    if (!email) return;
-
-    // Already premium from session or logged-in profile
-    if (hasAccess === true) {
-      setCareerProVerified();
-      navigate('/career/generating', { replace: true });
-      return;
-    }
-
-    // If hook says false, check Stripe for returning users (e.g. new session, not logged in)
-    if (hasAccess === false && !accessChecked) {
-      setAccessChecked(true);
-      fetch(`${API_BASE_URL}/api/stripe/check-career-access`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.hasAccess) {
-            setCareerProVerified();
-            navigate('/career/generating', { replace: true });
-          }
-        })
-        .catch(() => {});
-    }
-  }, [email, hasAccess, accessChecked, navigate]);
-
+  // Expiry countdown
   useEffect(() => {
     const timer = setInterval(() => {
-      const remaining = getCountdownEnd() - Date.now();
-      setCountdownMs(Math.max(0, remaining));
+      setExpiryMs(Math.max(0, getExpiryEnd() - Date.now()));
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -143,6 +144,7 @@ export function CareerPaywallScreen() {
     if (!email) return;
     setIsLoading(true);
     setError('');
+    trackReddit('InitiateCheckout', { value: 29, currency: 'USD', conversion_id: 'career_pro' });
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/stripe/create-career-checkout`,
@@ -165,140 +167,188 @@ export function CareerPaywallScreen() {
     }
   };
 
-  if (!email) return null;
+  if (!simulation || !email) return null;
+
+  // ─── Computed stats ───
+  const income = simulation.globalComparison?.income;
+  const compAboveIndustry =
+    income?.yourComp && income?.usAverage
+      ? Math.round(((income.yourComp - income.usAverage) / income.usAverage) * 100)
+      : null;
+  const incomePercentile = income?.globalPercentile;
+  const hasPositiveComp = compAboveIndustry !== null && compAboveIndustry > 0;
 
   return (
-    <div className="min-h-screen bg-white">
-      <style>{`
-        button.paywall-credit-debit-btn { min-height: 40px; height: 40px; }
-      `}</style>
-      {/* ── Sticky top bar ── */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-between">
-        <div>
-          <span className="text-xs sm:text-sm font-semibold text-black">
-            Your <span className="text-blue-600 font-bold">Career Sim</span> offer: $1.00!
-          </span>
-          <span className="text-xs sm:text-sm font-semibold text-black"> Ends in </span>
-          <span className="text-sm sm:text-base font-bold text-black tabular-nums">
-            {formatCountdown(countdownMs)}
+    <div className="min-h-screen bg-[#FAFAFA]">
+      {/* ── Sticky expiry bar ── */}
+      <div className="sticky top-0 z-50 bg-amber-50 border-b border-amber-200/80 px-4 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">⏳</span>
+          <span className="text-xs sm:text-sm font-semibold text-amber-900">
+            Results expire in <span className="tabular-nums">{formatExpiry(expiryMs)}</span>
           </span>
         </div>
         <button
           onClick={handleCheckout}
           disabled={isLoading}
-          className="px-4 py-2 rounded-lg text-sm font-bold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
+          className="px-3 py-1 rounded-lg text-[10px] font-bold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
           style={{ background: 'linear-gradient(135deg, #25729f, #62edb9)' }}
         >
-          Continue
+          Reveal
         </button>
       </div>
 
-      {/* ── Main content ── */}
-      <div className="max-w-lg mx-auto px-4 sm:px-6 pb-0">
+      <div className="max-w-lg mx-auto px-4 sm:px-6 pb-12 pt-4 scroll-mt-16">
 
         {/* ═══════════════════════════════════════ */}
-        {/* HERO — full above-the-fold             */}
+        {/* HERO                                   */}
         {/* ═══════════════════════════════════════ */}
         <section className="pt-6 sm:pt-10 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">
+            {simulation.timeHorizon}-Year Career Projection
+          </p>
           <h1
             className="text-2xl sm:text-3xl font-bold text-black leading-tight"
             style={{ fontFamily: 'Recoleta, Georgia, serif' }}
           >
-            Your Career Simulation
+            Your Career Results
             <br />
-            <span className="bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">is Ready</span>
+            <span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+              Are Ready
+            </span>
           </h1>
-          <p className="text-[11px] text-gray-400 mt-1.5">Results may surprise you</p>
-
-          {/* Blurred simulation preview card */}
-          <div className="relative my-5 sm:my-7 mx-auto max-w-[260px] sm:max-w-[300px]">
-            <div className="bg-gray-900 rounded-xl p-1.5 shadow-2xl border border-gray-700/50 transform rotate-1 hover:rotate-0 transition-transform duration-700">
-              <div className="bg-white rounded-lg overflow-hidden relative min-h-[140px]">
-                {!compRevealed ? (
-                  <div className="absolute inset-0 flex items-center justify-center p-4">
-                    <p className="text-sm font-medium text-gray-500 animate-pulse">Simulating...</p>
-                  </div>
-                ) : (
-                  <div className="p-3 sm:p-4 space-y-1.5 select-none">
-                    <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400">Your Career Outcome</p>
-                    <h4 className="text-sm sm:text-base font-bold text-black leading-tight" style={{ filter: 'blur(6px)' }}>Senior Engineering Manager</h4>
-                    <div className="flex items-center gap-2 text-[10px] text-gray-500">
-                      <span className="flex items-center gap-0.5"><Building2 className="w-2.5 h-2.5" /> <span style={{ filter: 'blur(6px)' }}>Horizon Labs</span></span>
-                      <span className="flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" /> <span style={{ filter: 'blur(6px)' }}>San Francisco</span></span>
-                    </div>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl font-bold text-black" style={{ filter: 'blur(6px)' }}>$285K</span>
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200" style={{ filter: 'blur(6px)' }}>+12%</span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-gray-100">
-                      {[
-                        { label: 'Promotions', val: '3' },
-                        { label: 'Team Size', val: '12' },
-                        { label: 'Hours/Wk', val: '50' },
-                        { label: 'Burnout', val: 'Med' },
-                      ].map((s) => (
-                        <div key={s.label}>
-                          <p className="text-[7px] text-gray-400">{s.label}</p>
-                          <p className="text-xs font-bold text-black" style={{ filter: 'blur(6px)' }}>{s.val}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* CTA — smaller text, wider on mobile */}
-          <button
-            onClick={() => pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            className="w-full max-w-[300px] sm:max-w-[260px] mx-auto rounded-2xl font-bold text-white flex items-center justify-center gap-2 py-3 text-sm transition-all hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]"
-            style={{ background: 'linear-gradient(135deg, #25729f, #62edb9)' }}
-          >
-            Let's begin
-          </button>
-
-          {/* Stats bullets — left-aligned with icons */}
-          <div className="mt-5 space-y-2 max-w-[240px] mx-auto text-left">
-            <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-black flex-shrink-0" />
-              <span className="text-xs text-gray-600"><strong className="text-black">800+</strong> simulations run today</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-3.5 h-3.5 text-black flex-shrink-0" />
-              <span className="text-xs text-gray-600">Trusted by <strong className="text-black">8,200</strong> professionals</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex gap-0.5 flex-shrink-0">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                ))}
-              </div>
-              <span className="text-xs text-gray-600"><strong className="text-black">4.9 / 5</strong> stars</span>
-            </div>
-          </div>
-
+          <p className="text-sm text-gray-500 mt-2">Here's a quick snapshot of your projection</p>
         </section>
 
         {/* ═══════════════════════════════════════ */}
-        {/* LOGO CAROUSEL                          */}
+        {/* BIG STAT — compensation vs industry     */}
         {/* ═══════════════════════════════════════ */}
-        <section className="py-6 -mx-4 sm:mx-0 overflow-hidden">
-          <p className="text-center text-[10px] font-semibold text-gray-300 uppercase tracking-widest mb-4">As seen on</p>
-          <div className="relative w-full">
-            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10" />
-            <div className="flex w-max animate-scroll">
-              {[0, 1].map((set) => (
-                <div key={set} className="flex items-center gap-12 mx-6 opacity-40 grayscale">
-                  <span className="text-base font-bold font-serif text-black whitespace-nowrap">Forbes</span>
-                  <span className="text-base font-bold tracking-tighter text-[#029f73] font-serif whitespace-nowrap">TechCrunch</span>
-                  <div className="flex items-center gap-1">
-                    <div className="w-4 h-4 rounded-full bg-[#DA552F] flex items-center justify-center text-white font-bold text-[9px] shrink-0">P</div>
-                    <span className="text-sm font-bold text-[#DA552F] whitespace-nowrap">Product Hunt</span>
-                  </div>
-                  <span className="text-base font-bold font-mono tracking-tighter border border-black px-1 text-black whitespace-nowrap">WIRED</span>
-                  <span className="text-sm font-bold uppercase tracking-wide text-[#e1005b] whitespace-nowrap">The Verge</span>
+        <section className="mt-7">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg relative overflow-hidden text-center">
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom right, rgba(0, 255, 136, 0.08), transparent, rgba(57, 255, 20, 0.05))' }} />
+            <div className="relative z-10">
+            {hasPositiveComp ? (
+              <>
+                <p className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-none" style={{ color: '#00FF88' }}>
+                  +{compAboveIndustry}%
+                </p>
+                <p className="text-[11px] font-medium text-gray-600 mt-1.5">
+                  above industry average compensation
+                </p>
+              </>
+            ) : incomePercentile ? (
+              <>
+                <p className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-none" style={{ color: '#00FF88' }}>
+                  Top {incomePercentile}%
+                </p>
+                <p className="text-[11px] font-medium text-gray-600 mt-1.5">
+                  of earners in your field
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-none" style={{ color: '#00FF88' }}>
+                  ${Math.round(simulation.outcome.totalComp / 1000)}K
+                </p>
+                <p className="text-[11px] font-medium text-gray-600 mt-1.5">
+                  projected total compensation
+                </p>
+              </>
+            )}
+            <p className="text-[10px] text-gray-400 mt-1">
+              Based on your projected {simulation.timeHorizon}-year trajectory
+            </p>
+            <button
+              onClick={() => document.getElementById('checkout')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="mt-4 px-5 py-2 rounded-lg text-sm font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg, #25729f, #62edb9)' }}
+            >
+              Reveal Career Simulation
+            </button>
+
+            {/* Credibility stats */}
+            <div className="mt-6 pt-6 space-y-2 text-left" style={{ borderTop: '1px solid rgba(0, 255, 136, 0.2)' }}>
+              <div className="flex items-center gap-2">
+                <Zap className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#00FF88' }} />
+                <span className="text-[11px] text-gray-600"><strong className="text-gray-800">600+</strong> simulations run today</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#00FF88' }} />
+                <span className="text-[11px] text-gray-600"><strong className="text-gray-800">8,200</strong> professionals helped</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#00FF88' }} />
+                <span className="text-[11px] text-gray-600"><strong className="text-gray-800">$1 billion</strong> in projected earnings</span>
+              </div>
+            </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════ */}
+        {/* BLURRED OUTCOME CARD                   */}
+        {/* ═══════════════════════════════════════ */}
+        <section className="mt-6">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-3">
+            Your Career Outcome
+          </p>
+          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm relative overflow-hidden">
+            {/* Lock overlay */}
+            <div className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
+              <Lock className="w-3.5 h-3.5 text-gray-400" />
+            </div>
+
+            <h3
+              className="text-lg font-bold text-black pr-10"
+              style={{ filter: 'blur(7px)', userSelect: 'none' }}
+            >
+              {simulation.outcome.title}
+            </h3>
+            <div className="flex items-center gap-2 text-xs text-gray-500 mt-1.5">
+              <span className="flex items-center gap-1" style={{ filter: 'blur(6px)', userSelect: 'none' }}>
+                <Building2 className="w-3 h-3" />
+                {simulation.outcome.company}
+              </span>
+              <span>·</span>
+              <span className="flex items-center gap-1" style={{ filter: 'blur(6px)', userSelect: 'none' }}>
+                <MapPin className="w-3 h-3" />
+                {simulation.outcome.location}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2 mt-3">
+              <span
+                className="text-3xl font-bold text-black"
+                style={{ filter: 'blur(8px)', userSelect: 'none' }}
+              >
+                ${simulation.outcome.totalComp.toLocaleString()}
+              </span>
+              {hasPositiveComp && (
+                <span
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200"
+                  style={{ filter: 'blur(5px)', userSelect: 'none' }}
+                >
+                  +{compAboveIndustry}%
+                </span>
+              )}
+            </div>
+
+            {/* Mini stats grid */}
+            <div className="grid grid-cols-4 gap-2 pt-3 mt-3 border-t border-gray-100">
+              {[
+                { label: 'Promotions', val: String(simulation.stats.growth.promotions) },
+                { label: 'Team Size', val: String(simulation.stats.growth.teamSize) },
+                { label: 'Hours/Wk', val: String(simulation.stats.workLife.hoursPerWeek) },
+                { label: 'Burnout', val: simulation.stats.workLife.burnoutRisk },
+              ].map((s) => (
+                <div key={s.label}>
+                  <p className="text-[8px] text-gray-400">{s.label}</p>
+                  <p
+                    className="text-sm font-bold text-black"
+                    style={{ filter: 'blur(6px)', userSelect: 'none' }}
+                  >
+                    {s.val}
+                  </p>
                 </div>
               ))}
             </div>
@@ -306,126 +356,204 @@ export function CareerPaywallScreen() {
         </section>
 
         {/* ═══════════════════════════════════════ */}
-        {/* WHY DOES EVERYONE LOVE MORA?           */}
+        {/* BLURRED TIMELINE                       */}
         {/* ═══════════════════════════════════════ */}
-        <section className="py-6 sm:py-10">
-          <h2
-            className="text-lg sm:text-xl font-bold text-black text-center mb-5 sm:mb-6"
-            style={{ fontFamily: 'Recoleta, Georgia, serif' }}
-          >
-            Why does everyone love Mora?
-          </h2>
-          <div className="space-y-3">
-            {[
-              { icon: Zap, color: 'text-amber-500', title: 'Instant results', desc: 'Your full career simulation in under 60 seconds.' },
-              { icon: Star, color: 'text-purple-500', title: 'Eerily accurate', desc: '91% of users say the projections matched their real career.' },
-              { icon: Gift, color: 'text-emerald-500', title: 'Alternate paths', desc: 'See what happens if you take the other offer, switch roles, or go freelance.' },
-              { icon: Heart, color: 'text-rose-500', title: 'Real daily life', desc: 'Not just salary — see your schedule, team, stress levels, and culture.' },
-            ].map((item) => (
-              <div key={item.title} className="flex gap-3 items-start">
-                <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
-                  <item.icon className={`w-4 h-4 ${item.color}`} />
+        <section className="mt-6">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-3">
+            Career Timeline
+          </p>
+          <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm relative overflow-hidden">
+            <div className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
+              <Lock className="w-3.5 h-3.5 text-gray-400" />
+            </div>
+
+            <div className="relative pl-5 space-y-4">
+              <div className="absolute left-[7px] top-1 bottom-1 w-0.5 bg-gradient-to-b from-teal-400 to-emerald-400 opacity-30" />
+              {simulation.timeline.milestones.slice(0, 4).map((m, i) => (
+                <div key={m.year} className="relative flex items-start gap-3">
+                  <div className="absolute left-[-17px] top-1.5 w-2.5 h-2.5 rounded-full bg-white border-[2.5px] border-teal-500 z-10" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded-full">
+                        Yr {m.year}
+                      </span>
+                      <span
+                        className="text-sm font-bold text-black truncate"
+                        style={{ filter: 'blur(6px)', userSelect: 'none' }}
+                      >
+                        {m.title}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
+                      <span style={{ filter: 'blur(5px)', userSelect: 'none' }}>{m.company}</span>
+                      <span
+                        className="font-bold text-gray-600"
+                        style={{ filter: 'blur(5px)', userSelect: 'none' }}
+                      >
+                        ${m.salary.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-black">{item.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {simulation.timeline.milestones.length > 4 && (
+              <p className="text-[10px] text-gray-400 mt-3 text-center">
+                +{simulation.timeline.milestones.length - 4} more milestones in full report
+              </p>
+            )}
           </div>
         </section>
 
         {/* ═══════════════════════════════════════ */}
-        {/* YOUR UNIQUE CAREER SIMULATION REVEAL   */}
+        {/* ALSO IN YOUR REPORT                    */}
         {/* ═══════════════════════════════════════ */}
-        <section ref={pricingRef} className="py-8 sm:py-12">
-          <h2
-            className="text-xl sm:text-2xl font-bold text-black mb-6"
-            style={{ fontFamily: 'Recoleta, Georgia, serif' }}
-          >
-            Your Unique Career Simulation Reveal
-          </h2>
-
-          <div className="space-y-4 mb-6">
-            {[
-              'Receive a full year-by-year career timeline with salary projections personalized to you',
-              'Discover daily life snapshots, team dynamics, and performance reviews at each stage',
-              'Test thousands of variants of your career path',
-              'Your 7-day trial will cost only $1.00. Afterwards, it will be $29/month',
-            ].map((item) => (
-              <div key={item} className="flex items-start gap-3">
-                <Check className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <span className="text-sm text-gray-800 leading-snug">{item}</span>
+        <section className="mt-6">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-3">
+            Also In Your Full Report
+          </p>
+          <div className="space-y-3">
+            {/* Daily Life Snapshot */}
+            <div className="bg-white rounded-xl p-3.5 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Smartphone className="w-3.5 h-3.5 text-gray-500" />
+                <span className="text-xs font-semibold text-gray-800">A Random Tuesday</span>
+                <Lock className="w-3 h-3 text-gray-300 ml-auto" />
               </div>
-            ))}
-          </div>
-
-          {/* Total due */}
-          <div className="border-t border-gray-200 pt-4 mb-5">
-            <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-black">Total due:</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-sm text-gray-400 line-through">$14.99</span>
-                <span className="text-xl font-extrabold text-black">$1.00</span>
+              <div className="space-y-1.5">
+                {[
+                  { app: 'Slack', body: 'Design review, 3 mockups shared', time: '9:30 AM' },
+                  { app: 'Gmail', body: 'Board update due Friday', time: '10:15 AM' },
+                ].map((n) => (
+                  <div key={n.app} className="flex items-center gap-2 px-2 py-1.5 bg-gray-50 rounded-lg" style={{ filter: 'blur(4px)', userSelect: 'none' }}>
+                    <span className="text-[9px] font-bold text-gray-500 w-8">{n.app}</span>
+                    <span className="text-[9px] text-gray-400 flex-1 truncate">{n.body}</span>
+                    <span className="text-[8px] text-gray-300">{n.time}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            <p className="text-[11px] text-emerald-600 font-medium text-right mt-0.5">You save 93%</p>
-          </div>
 
-          {/* Credit or Debit button */}
+            {/* The Email */}
+            <div className="bg-white rounded-xl p-3.5 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Mail className="w-3.5 h-3.5 text-gray-500" />
+                <span className="text-xs font-semibold text-gray-800">The Email That Changes Everything</span>
+                <Lock className="w-3 h-3 text-gray-300 ml-auto" />
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2.5" style={{ filter: 'blur(4px)', userSelect: 'none' }}>
+                <p className="text-[9px] text-gray-500"><span className="font-semibold">From:</span> david.chen@company.io</p>
+                <p className="text-[9px] font-semibold text-gray-700 mt-1">We'd like you to lead the platform team</p>
+                <p className="text-[9px] text-gray-400 mt-0.5 line-clamp-2">After seeing how you handled Q1, on time, zero incidents…</p>
+              </div>
+            </div>
+
+            {/* Remaining items - compact list */}
+            <div className="bg-white rounded-xl p-3.5 border border-gray-200 shadow-sm space-y-2.5">
+              {[
+                { Icon: MessageSquare, text: 'What your team really says about you' },
+                { Icon: GitBranch, text: 'Alternate career paths to explore' },
+                { Icon: Clock, text: 'Regret moments, the roads not taken' },
+                { Icon: Globe, text: 'Global comparison, how you stack up' },
+              ].map((item) => (
+                <div key={item.text} className="flex items-center gap-2.5">
+                  <item.Icon className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                  <span className="text-xs text-gray-600">{item.text}</span>
+                  <Lock className="w-3 h-3 text-gray-300 ml-auto flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════ */}
+        {/* CHECKOUT                               */}
+        {/* ═══════════════════════════════════════ */}
+        <section id="checkout" className="mt-10 bg-white rounded-2xl p-6 border border-gray-200 shadow-md scroll-mt-20">
+          <h2
+            className="text-xl font-bold text-black mb-1"
+            style={{ fontFamily: 'Recoleta, Georgia, serif' }}
+          >
+            Unlock Your Full Report
+          </h2>
+          <p className="text-sm text-gray-500 mb-6">
+            Complete payment to save and access your full career simulation.
+          </p>
+
+          {/* Total due */}
+          <div className="flex items-baseline justify-between mb-1">
+            <span className="text-sm font-semibold text-black">Total due today:</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-sm text-gray-400 line-through">$14.99</span>
+              <span className="text-2xl font-extrabold text-black">$1.00</span>
+            </div>
+          </div>
+          <p className="text-[11px] text-gray-400 mb-5">
+            7-day trial, then $29/month. Cancel anytime.
+          </p>
+
+          {/* CTA */}
           <button
             onClick={handleCheckout}
             disabled={isLoading}
-            className="paywall-credit-debit-btn w-full rounded-lg font-semibold text-white flex items-center justify-center gap-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:bg-blue-700 active:scale-[0.99] bg-blue-600"
+            className="w-full rounded-lg font-bold text-white flex items-center justify-center gap-2 py-2.5 text-sm transition-all hover:shadow-lg active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ background: 'linear-gradient(135deg, #25729f, #62edb9)' }}
           >
             {isLoading ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Processing...
               </>
             ) : (
               <>
-                <CreditCard className="w-5 h-5" />
-                <span>Checkout</span>
+                <CreditCard className="w-4 h-4" />
+                Checkout
               </>
             )}
           </button>
+
           {error && (
             <p className="mt-3 text-red-500 text-sm text-center">{error}</p>
           )}
+
+          {/* Trust indicators */}
+          <div className="flex items-center justify-center gap-3 mt-4 text-[11px] text-gray-400">
+            <span className="flex items-center gap-1">
+              <Shield className="w-3 h-3" /> Secure
+            </span>
+            <span className="text-gray-300">·</span>
+            <span className="flex items-center gap-1">
+              <Check className="w-3 h-3" /> Instant access
+            </span>
+            <span className="text-gray-300">·</span>
+            <span>Cancel anytime</span>
+          </div>
         </section>
 
         {/* ═══════════════════════════════════════ */}
         {/* FAQ                                    */}
         {/* ═══════════════════════════════════════ */}
-        <section className="py-6 sm:py-10 border-t border-gray-100">
-          <h2
-            className="text-lg sm:text-xl font-bold text-black mb-4 sm:mb-5"
-            style={{ fontFamily: 'Recoleta, Georgia, serif' }}
-          >
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-1.5 sm:space-y-2">
+        <section className="mt-8">
+          <div className="space-y-1.5">
             {FAQ_ITEMS.map((item, i) => (
               <div
                 key={i}
                 className="bg-white rounded-xl border border-gray-200 overflow-hidden"
               >
                 <button
-                  onClick={() =>
-                    setOpenFaqIndex(openFaqIndex === i ? null : i)
-                  }
-                  className="w-full px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between text-left font-medium text-gray-900"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
+                  className="w-full px-4 py-3 flex items-center justify-between text-left font-medium text-gray-900"
                 >
                   <span className="pr-4 text-sm">{item.q}</span>
                   <ChevronDown
-                    className={`w-5 h-5 flex-shrink-0 text-gray-500 transition-transform ${
+                    className={`w-4 h-4 flex-shrink-0 text-gray-400 transition-transform ${
                       openFaqIndex === i ? 'rotate-180' : ''
                     }`}
                   />
                 </button>
                 {openFaqIndex === i && (
-                  <div className="px-3 sm:px-4 pb-3 sm:pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-2 sm:pt-3">
+                  <div className="px-4 pb-3 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-2">
                     {item.a}
                   </div>
                 )}
@@ -435,9 +563,9 @@ export function CareerPaywallScreen() {
         </section>
 
         {/* ═══════════════════════════════════════ */}
-        {/* COMPARISON CHART                       */}
+        {/* Mora vs. Career Coach                  */}
         {/* ═══════════════════════════════════════ */}
-        <section className="py-6 sm:py-10 border-t border-gray-100">
+        <section className="mt-8 sm:mt-10 py-6 sm:py-10 border-t border-gray-100">
           <h2
             className="text-lg sm:text-xl font-bold text-black mb-4 sm:mb-5"
             style={{ fontFamily: 'Recoleta, Georgia, serif' }}
@@ -472,17 +600,14 @@ export function CareerPaywallScreen() {
             ))}
           </div>
           <p className="mt-4 text-[11px] text-gray-500 leading-relaxed">
-            Mora uses proprietary simulation technology to generate career projections. Results are probabilistic and not guaranteed. Our simulations are for entertainment and informational purposes only and should not replace professional career or financial advice. Past accuracy does not guarantee future outcomes.
+            Mora uses proprietary simulation technology to generate career projections. Results are probabilistic and not guaranteed. Our simulations are for entertainment and informational purposes only and should not replace professional career or financial advice.
           </p>
         </section>
 
-      </div>
-
-      {/* ═══════════════════════════════════════ */}
-      {/* PROFESSIONAL FOOTER                    */}
-      {/* ═══════════════════════════════════════ */}
-      <footer className="bg-gray-50 border-t border-gray-200">
-        <div className="max-w-lg mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        {/* ═══════════════════════════════════════ */}
+        {/* Footer                                 */}
+        {/* ═══════════════════════════════════════ */}
+        <footer className="bg-gray-50 border-t border-gray-200 mt-8 sm:mt-10 -mx-4 sm:-mx-6 px-4 sm:px-6 py-8 sm:py-10">
           <div className="flex items-center justify-center mb-4">
             <img src={moraLogo} alt="Mora" className="h-6 w-auto opacity-60" />
           </div>
@@ -496,8 +621,8 @@ export function CareerPaywallScreen() {
           <p className="text-center text-[11px] text-gray-300">
             © {new Date().getFullYear()} Mora. All rights reserved. For entertainment and informational purposes.
           </p>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }

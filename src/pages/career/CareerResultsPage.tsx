@@ -81,6 +81,16 @@ export function CareerResultsPage() {
     navigate('/dashboard');
   }, [location.state, navigate, searchParams]);
 
+  // Scroll to Branches section when arriving from dashboard "Branches" button
+  useEffect(() => {
+    const scrollToBranches = (location.state as { scrollToBranches?: boolean })?.scrollToBranches;
+    if (!scrollToBranches || !simulation?.alternatePaths?.length) return;
+    const el = document.getElementById('alternate-paths');
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+    }
+  }, [location.state, simulation]);
+
   // Check if saved, and auto-save if user is logged in with an unclaimed sim
   useEffect(() => {
     async function checkAndSave() {
@@ -358,7 +368,7 @@ export function CareerResultsPage() {
 
         {/* Section 7: Alternate Paths */}
         {simulation.alternatePaths?.length > 0 && (
-          <section className="scroll-animate opacity-0 translate-y-8 transition-all duration-700">
+          <section id="alternate-paths" className="scroll-animate opacity-0 translate-y-8 transition-all duration-700">
             <SectionHeader title="Alternate Paths" subtitle="What if you made a different choice?" />
             <AlternatePathsSection
               paths={simulation.alternatePaths}

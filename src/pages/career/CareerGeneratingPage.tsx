@@ -30,106 +30,10 @@ export function CareerGeneratingPage() {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [accessChecked, setAccessChecked] = useState(false);
-  const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
     trackEvent(Events.CAREER_GENERATING);
   }, []);
-
-  // Check premium access before generating
-  useEffect(() => {
-    let cancelled = false;
-
-    async function checkAccess() {
-      const params = new URLSearchParams(location.search);
-      const sessionId = params.get('session_id');
-
-      if (sessionId) {
-        try {
-          const res = await fetch(`${API_BASE_URL}/api/stripe/verify-career-session`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId }),
-          });
-          const data = await res.json();
-          if (data.success && !cancelled) {
-            trackReddit('Purchase', {
-              value: 29,
-              currency: 'USD',
-              conversion_id: 'career_pro',
-            });
-            setCareerProVerified();
-            setHasAccess(true);
-            setAccessChecked(true);
-            // Persist premium status + Stripe customer ID for logged-in users (for billing portal)
-            const { data: { user } } = await supabase.auth.getUser();
-            const customerId = typeof data.session?.customer === 'string'
-              ? data.session.customer
-              : data.session?.customer?.id;
-            if (user && customerId) {
-              await supabase.from('profiles').upsert(
-                {
-                  user_id: user.id,
-                  is_premium: true,
-                  stripe_customer_id: customerId,
-                  updated_at: new Date().toISOString(),
-                },
-                { onConflict: 'user_id' }
-              );
-            } else if (user) {
-              await supabase.from('profiles').upsert(
-                { user_id: user.id, is_premium: true, updated_at: new Date().toISOString() },
-                { onConflict: 'user_id' }
-              );
-            }
-            // Clean URL (remove session_id)
-            window.history.replaceState({}, '', '/career/generating');
-            return;
-          }
-        } catch (e) {
-          console.error('Session verify failed:', e);
-        }
-        if (!cancelled) {
-          navigate('/career/paywall', { replace: true });
-          return;
-        }
-      }
-
-      // No session_id - check stored verification or logged-in premium
-      const stored = sessionStorage.getItem('careerProVerified');
-      if (stored === 'true') {
-        if (!cancelled) {
-          setHasAccess(true);
-          setAccessChecked(true);
-        }
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_premium')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if (profile?.is_premium && !cancelled) {
-          setHasAccess(true);
-          setAccessChecked(true);
-          return;
-        }
-      }
-
-      if (!cancelled) {
-        setAccessChecked(true);
-        setHasAccess(false);
-        navigate('/career/paywall', { replace: true });
-      }
-    }
-
-    checkAccess();
-    return () => { cancelled = true; };
-  }, [location.search, navigate]);
 
   // Cycle through loading messages
   useEffect(() => {
@@ -150,19 +54,155 @@ export function CareerGeneratingPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Generate simulation once access is confirmed
+  // Main logic
   useEffect(() => {
-    if (!accessChecked || !hasAccess) return;
-
     let cancelled = false;
 
-    async function generate() {
+    async function run() {
+      const params = new URLSearchParams(location.search);
+      const sessionId = params.get('session_id');
+
+      // ═══════════════════════════════════════════════
+      // FLOW A: Returning from Stripe payment
+      // ═══════════════════════════════════════════════
+      if (sessionId) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/stripe/verify-career-session`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId }),
+          });
+          const data = await res.json();
+
+          if (data.success && !cancelled) {
+            trackReddit('Purchase', {
+              value: 29,
+              currency: 'USD',
+              conversion_id: 'career_pro',
+            });
+            setCareerProVerified();
+
+            // Persist premium status for logged-in users
+            const { data: { user } } = await supabase.auth.getUser();
+            const customerId = typeof data.session?.customer === 'string'
+              ? data.session.customer
+              : data.session?.customer?.id;
+            if (user && customerId) {
+              await supabase.from('profiles').upsert(
+                {
+                  user_id: user.id,
+                  is_premium: true,
+                  stripe_customer_id: customerId,
+                  updated_at: new Date().toISOString(),
+                },
+                { onConflict: 'user_id' },
+              );
+            } else if (user) {
+              await supabase.from('profiles').upsert(
+                { user_id: user.id, is_premium: true, updated_at: new Date().toISOString() },
+                { onConflict: 'user_id' },
+              );
+            }
+
+            // Clean URL
+            window.history.replaceState({}, '', '/career/generating');
+
+            // Load pre-generated simulation from localStorage
+            const storedSim = localStorage.getItem('pendingCareerSimulation');
+            const storedSimId = localStorage.getItem('pendingCareerSimulationId');
+
+            if (storedSim) {
+              const simulation = JSON.parse(storedSim);
+              // Clean up pending data
+              localStorage.removeItem('pendingCareerSimulation');
+              localStorage.removeItem('pendingCareerSimulationId');
+              localStorage.removeItem('careerPaywallExpiryEnd');
+
+              setProgress(100);
+              setTimeout(() => {
+                if (!cancelled) {
+                  navigate('/career/results', {
+                    state: {
+                      simulationId: storedSimId,
+                      careerSimulation: simulation,
+                      timestamp: Date.now(),
+                    },
+                    replace: true,
+                  });
+                }
+              }, 600);
+              return;
+            }
+
+            // Fallback: try loading from DB
+            if (storedSimId) {
+              const { data: dbSim } = await supabase
+                .from('websims')
+                .select('scenarios')
+                .eq('id', storedSimId)
+                .maybeSingle();
+
+              if (dbSim?.scenarios && !cancelled) {
+                localStorage.removeItem('pendingCareerSimulationId');
+                localStorage.removeItem('careerPaywallExpiryEnd');
+                setProgress(100);
+                setTimeout(() => {
+                  navigate('/career/results', {
+                    state: {
+                      simulationId: storedSimId,
+                      careerSimulation: dbSim.scenarios,
+                      timestamp: Date.now(),
+                    },
+                    replace: true,
+                  });
+                }, 600);
+                return;
+              }
+            }
+
+            // Last fallback: regenerate (falls through to generation below)
+          } else {
+            // Verification failed — send back to paywall
+            if (!cancelled) navigate('/career/paywall', { replace: true });
+            return;
+          }
+        } catch (e) {
+          console.error('Session verify failed:', e);
+          if (!cancelled) navigate('/career/paywall', { replace: true });
+          return;
+        }
+      }
+
+      // ═══════════════════════════════════════════════
+      // Determine premium status
+      // ═══════════════════════════════════════════════
+      let isPremium = sessionStorage.getItem('careerProVerified') === 'true';
+
+      if (!isPremium) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_premium')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          if (profile?.is_premium) {
+            setCareerProVerified();
+            isPremium = true;
+          }
+        }
+      }
+
+      if (cancelled) return;
+
+      // ═══════════════════════════════════════════════
+      // GENERATE SIMULATION — for everyone
+      // ═══════════════════════════════════════════════
       try {
         const simulation = await generateCareerSimulation(onboardingData);
-
         if (cancelled) return;
 
-        // Try to save to database (use current user if logged in)
+        // Save to DB
         let simulationId: string | null = null;
         try {
           const { data: { user } } = await supabase.auth.getUser();
@@ -185,20 +225,42 @@ export function CareerGeneratingPage() {
         }
 
         if (cancelled) return;
-
         setProgress(100);
 
-        // Navigate to results
-        setTimeout(() => {
-          navigate('/career/results', {
-            state: {
-              simulationId,
-              careerSimulation: simulation,
-              timestamp: Date.now(),
-            },
-            replace: true,
-          });
-        }, 500);
+        if (isPremium) {
+          // ═══════════════════════════════════════════
+          // FLOW B: Premium user → straight to results
+          // ═══════════════════════════════════════════
+          setTimeout(() => {
+            if (!cancelled) {
+              navigate('/career/results', {
+                state: {
+                  simulationId,
+                  careerSimulation: simulation,
+                  timestamp: Date.now(),
+                },
+                replace: true,
+              });
+            }
+          }, 600);
+        } else {
+          // ═══════════════════════════════════════════
+          // FLOW C: Non-premium → store sim, go to paywall
+          // ═══════════════════════════════════════════
+          localStorage.setItem('pendingCareerSimulation', JSON.stringify(simulation));
+          if (simulationId) {
+            localStorage.setItem('pendingCareerSimulationId', simulationId);
+          }
+
+          setTimeout(() => {
+            if (!cancelled) {
+              navigate('/career/paywall', {
+                state: { simulation, simulationId },
+                replace: true,
+              });
+            }
+          }, 600);
+        }
       } catch (err) {
         if (cancelled) return;
         console.error('Career simulation generation failed:', err);
@@ -206,19 +268,9 @@ export function CareerGeneratingPage() {
       }
     }
 
-    generate();
+    run();
     return () => { cancelled = true; };
-  }, [accessChecked, hasAccess]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Show minimal loading while checking access
-  if (!accessChecked || !hasAccess) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
-        <div className="w-8 h-8 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
-        <p className="mt-4 text-gray-500">Verifying...</p>
-      </div>
-    );
-  }
+  }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">

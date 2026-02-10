@@ -6,6 +6,7 @@ import { Check, Lock, Shield, Sparkles, Star, ArrowRight, Zap, TrendingUp } from
 import moraIcon from '../assets/moraicon.png';
 import moraLogo from '../assets/mora.png';
 import { trackEvent } from '../lib/mixpanel';
+import { trackReddit } from '../lib/reddit';
 
 // Use relative path in production (Vercel serverless), localhost in dev
 const API_BASE_URL = import.meta.env.VITE_PROXY_URL || 
@@ -48,6 +49,7 @@ export function PaymentPage() {
         user_id: userId,
         amount: 4.99,
       });
+      trackReddit('InitiateCheckout', { value: 4.99, currency: 'USD' });
 
       // Create Stripe Checkout Session
       const apiUrl = `${API_BASE_URL}/api/stripe/create-checkout-session`;
